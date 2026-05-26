@@ -1,0 +1,423 @@
+
+[
+  {
+    "id": 1,
+    "texture": "1.png",
+    "sides": ["river", "field", "field", "field"]
+  },
+  {
+    "id": 2,
+    "texture": "2.png",
+    "sides": ["field", "river", "river", "field"]
+  },
+  {
+    "id": 3,
+    "texture": "3.png",
+    "sides": ["field", "river", "river", "field"]
+  },
+  {
+    "id": 4,
+    "texture": "4.png",
+    "sides": ["city", "city", "river", "river"]
+  },
+  {
+    "id": 5,
+    "texture": "5.png",
+    "sides": ["river", "field", "river", "field"]
+  },
+  {
+    "id": 6,
+    "texture": "6.png",
+    "sides": ["city", "river", "city", "river"]
+  },
+  {
+    "id": 7,
+    "texture": "7.png",
+    "sides": ["field", "river", "field", "river"]
+  },
+  {
+    "id": 8,
+    "texture": "8.png",
+    "sides": ["field", "river", "road", "river"]
+  },
+  {
+    "id": 9,
+    "texture": "9.png",
+    "sides": ["river", "road", "road", "river"]
+  },
+  {
+    "id": 10,
+    "texture": "10.png",
+    "sides": ["road", "river", "city", "river"]
+  },
+  {
+    "id": 11,
+    "texture": "11.png",
+    "sides": ["road", "river", "road", "river"]
+  },
+  {
+    "id": 12,
+    "texture": "12.png",
+    "sides": ["road", "river", "field", "road"]
+  },
+  {
+    "id": 13,
+    "texture": "13.png",
+    "sides": ["road", "city", "field", "road"]
+  },
+  {
+    "id": 14,
+    "texture": "14.png",
+    "sides": ["city", "city", "field", "city"]
+  },
+  {
+    "id": 15,
+    "texture": "15.png",
+    "sides": ["field", "road", "field", "road"]
+  },
+  {
+    "id": 16,
+    "texture": "16.png",
+    "sides": ["road", "city", "city", "road"]
+  },
+  {
+    "id": 17,
+    "texture": "17.png",
+    "sides": ["road", "city", "road", "field"]
+  },
+  {
+    "id": 18,
+    "texture": "18.png",
+    "sides": ["field", "road", "field", "field"]
+  },
+  {
+    "id": 19,
+    "texture": "19.png",
+    "sides": ["road", "road", "field", "road"]
+  },
+  {
+    "id": 20,
+    "texture": "20.png",
+    "sides": ["city", "field", "city", "city"]
+  },
+  {
+    "id": 21,
+    "texture": "21.png",
+    "sides": ["city", "road", "road", "city"]
+  },
+  {
+    "id": 22,
+    "texture": "22.png",
+    "sides": ["field", "road", "field", "road"]
+  },
+  {
+    "id": 23,
+    "texture": "23.png",
+    "sides": ["road", "field", "road", "road"]
+  },
+  {
+    "id": 24,
+    "texture": "24.png",
+    "sides": ["field", "city", "field", "city"]
+  },
+  {
+    "id": 25,
+    "texture": "25.png",
+    "sides": ["road", "city", "field", "road"]
+  },
+  {
+    "id": 26,
+    "texture": "26.png",
+    "sides": ["road", "road", "field", "city"]
+  },
+  {
+    "id": 27,
+    "texture": "27.png",
+    "sides": ["city", "road", "road", "field"]
+  },
+  {
+    "id": 28,
+    "texture": "28.png",
+    "sides": ["road", "field", "road", "road"]
+  },
+  {
+    "id": 29,
+    "texture": "29.png",
+    "sides": ["city", "road", "road", "road"]
+  },
+  {
+    "id": 30,
+    "texture": "30.png",
+    "sides": ["field", "city", "field", "field"]
+  },
+  {
+    "id": 31,
+    "texture": "31.png",
+    "sides": ["city", "city", "field", "field"]
+  },
+  {
+    "id": 32,
+    "texture": "32.png",
+    "sides": ["field", "city", "city", "field"]
+  },
+  {
+    "id": 33,
+    "texture": "33.png",
+    "sides": ["road", "city", "city", "city"]
+  },
+  {
+    "id": 34,
+    "texture": "34.png",
+    "sides": ["field", "field", "road", "road"]
+  },
+  {
+    "id": 35,
+    "texture": "35.png",
+    "sides": ["field", "road", "field", "road"]
+  },
+  {
+    "id": 36,
+    "texture": "36.png",
+    "sides": ["city", "road", "road", "city"]
+  },
+  {
+    "id": 37,
+    "texture": "37.png",
+    "sides": ["city", "city", "field", "field"]
+  },
+  {
+    "id": 38,
+    "texture": "38.png",
+    "sides": ["city", "city", "city", "city"]
+  },
+  {
+    "id": 39,
+    "texture": "39.png",
+    "sides": ["field", "road", "city", "road"]
+  },
+  {
+    "id": 40,
+    "texture": "40.png",
+    "sides": ["city", "field", "field", "field"]
+  },
+  {
+    "id": 41,
+    "texture": "41.png",
+    "sides": ["city", "city", "city", "field"]
+  },
+  {
+    "id": 42,
+    "texture": "42.png",
+    "sides": ["road", "road", "field", "field"]
+  },
+  {
+    "id": 43,
+    "texture": "43.png",
+    "sides": ["road", "field", "field", "road"]
+  },
+  {
+    "id": 44,
+    "texture": "44.png",
+    "sides": ["city", "city", "city", "field"]
+  },
+  {
+    "id": 45,
+    "texture": "45.png",
+    "sides": ["road", "city", "city", "road"]
+  },
+  {
+    "id": 46,
+    "texture": "46.png",
+    "sides": ["field", "city", "city", "field"]
+  },
+  {
+    "id": 47,
+    "texture": "47.png",
+    "sides": ["road", "road", "road", "road"]
+  },
+  {
+    "id": 48,
+    "texture": "48.png",
+    "sides": ["field", "field", "road", "road"]
+  },
+  {
+    "id": 49,
+    "texture": "49.png",
+    "sides": ["field", "city", "field", "field"]
+  },
+  {
+    "id": 50,
+    "texture": "50.png",
+    "sides": ["city", "field", "field", "city"]
+  },
+  {
+    "id": 51,
+    "texture": "51.png",
+    "sides": ["field", "field", "field", "field"]
+  },
+  {
+    "id": 52,
+    "texture": "52.png",
+    "sides": ["field", "field", "field", "field"]
+  },
+  {
+    "id": 53,
+    "texture": "53.png",
+    "sides": ["field", "field", "field", "field"]
+  },
+  {
+    "id": 54,
+    "texture": "54.png",
+    "sides": ["field", "road", "field", "field"]
+  },
+  {
+    "id": 55,
+    "texture": "55.png",
+    "sides": ["field", "field", "field", "field"]
+  },
+  {
+    "id": 56,
+    "texture": "56.png",
+    "sides": ["field", "road", "road", "city"]
+  },
+  {
+    "id": 57,
+    "texture": "57.png",
+    "sides": ["field", "road", "field", "road"]
+  },
+  {
+    "id": 58,
+    "texture": "58.png",
+    "sides": ["city", "road", "road", "road"]
+  },
+  {
+    "id": 59,
+    "texture": "59.png",
+    "sides": ["field", "city", "field", "city"]
+  },
+  {
+    "id": 60,
+    "texture": "60.png",
+    "sides": ["road", "road", "field", "field"]
+  },
+  {
+    "id": 61,
+    "texture": "61.png",
+    "sides": ["field", "road", "city", "road"]
+  },
+  {
+    "id": 62,
+    "texture": "62.png",
+    "sides": ["road", "city", "city", "road"]
+  },
+  {
+    "id": 63,
+    "texture": "63.png",
+    "sides": ["city", "field", "field", "city"]
+  },
+  {
+    "id": 64,
+    "texture": "64.png",
+    "sides": ["field", "field", "city", "field"]
+  },
+  {
+    "id": 65,
+    "texture": "65.png",
+    "sides": ["field", "field", "road", "road"]
+  },
+  {
+    "id": 66,
+    "texture": "66.png",
+    "sides": ["field", "field", "road", "road"]
+  },
+  {
+    "id": 67,
+    "texture": "67.png",
+    "sides": ["road", "road", "road", "field"]
+  },
+  {
+    "id": 68,
+    "texture": "68.png",
+    "sides": ["city", "field", "city", "field"]
+  },
+  {
+    "id": 69,
+    "texture": "69.png",
+    "sides": ["road", "city", "city", "city"]
+  },
+  {
+    "id": 70,
+    "texture": "70.png",
+    "sides": ["field", "city", "road", "road"]
+  },
+  {
+    "id": 71,
+    "texture": "71.png",
+    "sides": ["field", "field", "field", "city"]
+  },
+  {
+    "id": 72,
+    "texture": "72.png",
+    "sides": ["city", "field", "city", "field"]
+  },
+  {
+    "id": 73,
+    "texture": "73.png",
+    "sides": ["road", "field", "field", "road"]
+  },
+  {
+    "id": 74,
+    "texture": "74.png",
+    "sides": ["road", "field", "road", "field"]
+  },
+  {
+    "id": 75,
+    "texture": "75.png",
+    "sides": ["city", "field", "city", "field"]
+  },
+  {
+    "id": 76,
+    "texture": "76.png",
+    "sides": ["road", "field", "road", "field"]
+  },
+  {
+    "id": 77,
+    "texture": "77.png",
+    "sides": ["city", "city", "road", "city"]
+  },
+  {
+    "id": 78,
+    "texture": "78.png",
+    "sides": ["road", "field", "road", "field"]
+  },
+  {
+    "id": 79,
+    "texture": "79.png",
+    "sides": ["city", "field", "field", "city"]
+  },
+  {
+    "id": 80,
+    "texture": "80.png",
+    "sides": ["road", "road", "road", "city"]
+  },
+  {
+    "id": 81,
+    "texture": "81.png",
+    "sides": ["field", "field", "road", "road"]
+  },
+  {
+    "id": 82,
+    "texture": "82.png",
+    "sides": ["field", "city", "field", "city"]
+  },
+  {
+    "id": 83,
+    "texture": "83.png",
+    "sides": ["field", "road", "field", "road"]
+  },
+  {
+    "id": 84,
+    "texture": "84.png",
+    "sides": ["road", "city", "road", "field"]
+  }
+]
