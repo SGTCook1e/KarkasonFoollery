@@ -1,12 +1,12 @@
 package tile
 
-type SideType int
+type SideType string
 
 const (
-	Field SideType = iota
-	Road
-	City
-	River
+	Field SideType = "field"
+	Road  SideType = "road"
+	City  SideType = "city"
+	River SideType = "river"
 )
 
 type Direction int

@@ -69,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// Rotate around the tile center in local space
 		half := float64(tileSize) / 2
 		opts.GeoM.Translate(-half, -half)
-		opts.GeoM.Rotate(float64(t.Rotation) * math.Pi / 2)
+		opts.GeoM.Rotate(float64(t.Dir) * math.Pi / 2)
 		opts.GeoM.Translate(half, half)
 
 		// Scale and then translate to screen coordinates
@@ -144,7 +144,7 @@ func (g *Game) drawPreview(screen *ebiten.Image) {
 	half := float64(tileSize) / 2
 	opts := ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(-half, -half)
-	opts.GeoM.Rotate(float64(g.curentTile.Rotation) * math.Pi / 2)
+	opts.GeoM.Rotate(float64(g.curentTile.Dir) * math.Pi / 2)
 	opts.GeoM.Translate(half, half)
 
 	opts.GeoM.Scale(g.zoom, g.zoom)
@@ -170,7 +170,7 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *tile.Tile, worldX, wo
 	}
 
 	for _, dir := range []tile.Direction{tile.Top, tile.Right, tile.Bottom, tile.Left} {
-		label := t.SideAt(dir).String()
+		label := string(t.SideAt(dir))
 		sx, sy := g.worldToScreen(worldX+offsets[dir].x, worldY+offsets[dir].y)
 		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
 	}
