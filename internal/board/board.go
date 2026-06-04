@@ -1,29 +1,28 @@
 package board
 
 import (
-	"KarkasonFoollery/internal/tile"
 	"fmt"
 )
 
 type Board struct {
-	tiles map[Coord]*tile.Tile
+	tiles map[Coord]*Tile
 }
 
-func (b *Board) GetTiles() map[Coord]*tile.Tile {
+func (b *Board) GetTiles() map[Coord]*Tile {
 	return b.tiles
 }
 
 func NewBoard() *Board {
 	return &Board{
-		tiles: make(map[Coord]*tile.Tile),
+		tiles: make(map[Coord]*Tile),
 	}
 }
 
-func (b *Board) PlaceTile(c Coord, t *tile.Tile) {
+func (b *Board) PlaceTile(c Coord, t *Tile) {
 	b.tiles[c] = t
 }
 
-func (b *Board) GetTile(c Coord) (*tile.Tile, bool) {
+func (b *Board) GetTile(c Coord) (*Tile, bool) {
 	t, exists := b.tiles[c]
 	return t, exists
 }
@@ -58,7 +57,7 @@ func (b *Board) CanPlaceTile(c Coord) bool {
 	return false
 }
 
-func (b *Board) IsValidPlacement(c Coord, t *tile.Tile) bool {
+func (b *Board) IsValidPlacement(c Coord, t *Tile) bool {
 	if len(b.tiles) == 0 {
 		return true
 	}
@@ -69,25 +68,25 @@ func (b *Board) IsValidPlacement(c Coord, t *tile.Tile) bool {
 	validNeighbor := false
 
 	if top, ok := b.tiles[Coord{X: c.X, Y: c.Y - 1}]; ok {
-		if top.GetSide(tile.Bottom) != t.GetSide(tile.Top) {
+		if top.GetSide(Bottom) != t.GetSide(Top) {
 			return false
 		}
 		validNeighbor = true
 	}
 	if right, ok := b.tiles[Coord{X: c.X + 1, Y: c.Y}]; ok {
-		if right.GetSide(tile.Left) != t.GetSide(tile.Right) {
+		if right.GetSide(Left) != t.GetSide(Right) {
 			return false
 		}
 		validNeighbor = true
 	}
 	if bottom, ok := b.tiles[Coord{X: c.X, Y: c.Y + 1}]; ok {
-		if bottom.GetSide(tile.Top) != t.GetSide(tile.Bottom) {
+		if bottom.GetSide(Top) != t.GetSide(Bottom) {
 			return false
 		}
 		validNeighbor = true
 	}
 	if left, ok := b.tiles[Coord{X: c.X - 1, Y: c.Y}]; ok {
-		if left.GetSide(tile.Right) != t.GetSide(tile.Left) {
+		if left.GetSide(Right) != t.GetSide(Left) {
 			return false
 		}
 		validNeighbor = true

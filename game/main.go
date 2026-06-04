@@ -2,7 +2,6 @@ package main
 
 import (
 	"KarkasonFoollery/internal/board"
-	"KarkasonFoollery/internal/tile"
 	"KarkasonFoollery/internal/ui"
 	"log"
 
@@ -15,8 +14,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tiles := tile.LoadTiles()
-	deck := tile.NewDeck(tiles)
+	tiles := board.LoadTiles()
+	deck := board.NewDeck(tiles)
 
 	game := ui.NewGame(board1, assets, deck)
 	ebiten.SetWindowSize(1280, 720)

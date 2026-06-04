@@ -1,0 +1,212 @@
+[
+  {
+    "id": 1,
+    "texture": "1.png",
+    "sides": ["river", "field", "field", "field"],
+    "features":[
+      {
+        "type": "river",
+        "sides": [{"dir":"top"}]
+      },
+      {
+        "type": "field",
+        "sides":[{"dir":"right"},{"dir":"bottom"},{"dir":"left"}]
+      }
+    ],
+    "monastery": true
+  },
+  {
+    "id": 2,
+    "texture": "2.png",
+    "sides": ["field", "river", "river", "field"],
+    "features":[{
+      "type":"river",
+      "sides":[{"dir":"right"},{"dir":"bottom"}]
+    },
+    {
+      "type":"field",
+      "sides":[{"dir":"top"},{"dir":"left"}]
+    }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 3,
+    "texture": "3.png",
+    "sides": ["field", "river", "river", "field"],
+    "features":[{
+      "type":"river",
+      "sides":[{"dir":"right"},{"dir":"bottom"}]
+    },
+    {
+      "type":"field",
+      "sides":[{"dir":"top"},{"dir":"left"}]
+    }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 4,
+    "texture": "4.png",
+    "sides": ["city", "city", "river", "river"],
+    "features":[
+      {
+        "type":"city",
+        "sides":[{"dir":"top"},{"dir":"right"}]
+      },
+      {
+        "type":"river",
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 5,
+    "texture": "5.png",
+    "sides": ["river", "field", "river", "field"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"top"},{"dir":"bottom"}]
+      },
+      {
+        "type":"field",
+        "sides":[{"dir":"right"},{"dir":"left"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 6,
+    "texture": "6.png",
+    "sides": ["city", "river", "city", "river"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"left"},{"dir":"right"}]
+      },
+      {
+        "type":"city",
+        "sides":[{"dir":"top"}]
+      },
+      {
+        "type":"city",
+        "sides":[{"dir":"bottom"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 7,
+    "texture": "7.png",
+    "sides": ["field", "river", "field", "river"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"left"},{"dir":"right"}]
+      },
+      {
+        "type":"field",
+        "sides":[{"dir":"top"}]
+      },
+      {
+        "type":"field",
+        "sides":[{"dir":"bottom"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 8,
+    "texture": "8.png",
+    "sides": ["field", "river", "road", "river"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"left"},{"dir":"right"}]
+      },
+      {
+        "type":"road",
+        "sides":[{"dir":"bottom"}]
+      },
+      {
+        "type":"field",
+        "sides":[{"dir":"bottom"}]
+      }
+    ],
+    "monastery": true
+  },
+  {
+    "id": 9,
+    "texture": "9.png",
+    "sides": ["river", "road", "road", "river"],
+    "features":[
+      {
+        "type":"road",
+        "sides":[{"dir":"right"},{"dir":"bottom"}]
+      },
+      {
+        "type":"river",
+        "sides":[{"dir":"top"},{"dir":"left"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 10,
+    "texture": "10.png",
+    "sides": ["road", "river", "city", "river"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"left"},{"dir":"right"}]
+      },
+      {
+        "type":"road",
+        "sides":[{"dir":"top"}]
+      },
+      {
+        "type":"city",
+        "sides":[{"dir":"bottom"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 11,
+    "texture": "11.png",
+    "sides": ["road", "river", "road", "river"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"left"},{"dir":"right"}]
+      },
+      {
+        "type":"road",
+        "sides":[{"dir":"top"},{"dir":"bottom"}]
+      }
+    ],
+    "monastery": false
+  },
+  {
+    "id": 12,
+    "texture": "12.png",
+    "sides": ["road", "river", "field", "road"],
+    "features":[
+      {
+        "type":"river",
+        "sides":[{"dir":"right"}]
+      },
+      {
+        "type":"road",
+        "sides":[{"dir":"top"},{"dir":"left"}]
+      },
+      {
+        "type":"field",
+        "sides":[{"dir":"bottom"}]
+      }
+    ],
+    "monastery": false
+  }
+]

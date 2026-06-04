@@ -20,3 +20,23 @@ func (c Coord) Bottom() Coord {
 func (c Coord) Left() Coord {
 	return Coord{X: c.X - 1, Y: c.Y}
 }
+
+func (c Coord) CoordByDirection(dir Direction) Coord {
+	var r Coord
+	switch dir {
+	case Top:
+		r = c.Top()
+	case Right:
+		r = c.Right()
+	case Bottom:
+		r = c.Bottom()
+	case Left:
+		r = c.Left()
+	}
+	return r
+}
+
+func (c Coord) GetCoordsAround() []Coord {
+
+	return nil
+}

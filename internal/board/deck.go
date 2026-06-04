@@ -1,4 +1,4 @@
-package tile
+package board
 
 import "math/rand/v2"
 

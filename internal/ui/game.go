@@ -2,7 +2,6 @@ package ui
 
 import (
 	"KarkasonFoollery/internal/board"
-	"KarkasonFoollery/internal/tile"
 	"math"
 
 	"image/color"
@@ -14,8 +13,9 @@ import (
 const tileSize = 256
 
 type Game struct {
-	board  *board.Board
-	assets *Assets
+	board   *board.Board
+	regions *board.Regions
+	assets  *Assets
 
 	cameraX, cameraY float64
 	zoom             float64
@@ -25,21 +25,24 @@ type Game struct {
 
 	cameraSpeed float64
 
-	curentTile *tile.Tile
+	curentTile *board.Tile
 	// curentTileID int
 	rotPressed bool
 
 	hoverX, hoverY int
 
 	// tiles []*tile.Tile
-	deck *tile.Deck
+	deck *board.Deck
 }
 
-func NewGame(b *board.Board, assets *Assets, deck *tile.Deck) *Game {
+func NewGame(b *board.Board, assets *Assets, deck *board.Deck) *Game {
 	firstTile := deck.Draw()
+
+	regions := make(board.Regions)
 
 	return &Game{
 		board:      b,
+		regions:    &regions,
 		assets:     assets,
 		deck:       deck,
 		curentTile: firstTile,
@@ -69,7 +72,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// Rotate around the tile center in local space
 		half := float64(tileSize) / 2
 		opts.GeoM.Translate(-half, -half)
-		opts.GeoM.Rotate(float64(t.Dir) * math.Pi / 2)
+		opts.GeoM.Rotate(float64(t.Orientation) * math.Pi / 2)
 		opts.GeoM.Translate(half, half)
 
 		// Scale and then translate to screen coordinates
@@ -144,7 +147,7 @@ func (g *Game) drawPreview(screen *ebiten.Image) {
 	half := float64(tileSize) / 2
 	opts := ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(-half, -half)
-	opts.GeoM.Rotate(float64(g.curentTile.Dir) * math.Pi / 2)
+	opts.GeoM.Rotate(float64(g.curentTile.Orientation) * math.Pi / 2)
 	opts.GeoM.Translate(half, half)
 
 	opts.GeoM.Scale(g.zoom, g.zoom)
@@ -157,19 +160,19 @@ func (g *Game) drawPreview(screen *ebiten.Image) {
 
 }
 
-func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *tile.Tile, worldX, worldY float64) {
+func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
 	if g.zoom < 0.25 {
 		return
 	}
 
-	offsets := map[tile.Direction]struct{ x, y float64 }{
-		tile.Top:    {x: tileSize*0.5 - 28, y: 8},
-		tile.Right:  {x: tileSize - 92, y: tileSize*0.5 - 8},
-		tile.Bottom: {x: tileSize*0.5 - 28, y: tileSize - 24},
-		tile.Left:   {x: 8, y: tileSize*0.5 - 8},
+	offsets := map[board.Direction]struct{ x, y float64 }{
+		board.Top:    {x: tileSize*0.5 - 28, y: 8},
+		board.Right:  {x: tileSize - 92, y: tileSize*0.5 - 8},
+		board.Bottom: {x: tileSize*0.5 - 28, y: tileSize - 24},
+		board.Left:   {x: 8, y: tileSize*0.5 - 8},
 	}
 
-	for _, dir := range []tile.Direction{tile.Top, tile.Right, tile.Bottom, tile.Left} {
+	for _, dir := range []board.Direction{board.Top, board.Right, board.Bottom, board.Left} {
 		label := string(t.SideAt(dir))
 		sx, sy := g.worldToScreen(worldX+offsets[dir].x, worldY+offsets[dir].y)
 		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
@@ -209,6 +212,7 @@ func (g *Game) Update() error {
 		if !exists {
 			if g.board.IsValidPlacement(coord, g.curentTile) {
 				g.board.PlaceTile(coord, g.curentTile.Clone())
+				g.regions.ManageRegions(g.board, coord)
 				g.curentTile = g.deck.Draw()
 			}
 		}
