@@ -126,7 +126,7 @@
       },
       {
         "type":"field",
-        "sides":[{"dir":"bottom"}]
+        "sides":[{"dir":"top"}]
       }
     ],
     "monastery": true
