@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"slices"
 )
 
 type Regions map[*Region]struct{}
@@ -26,8 +27,8 @@ func ManageMonasteryRegions(b *Board, newTileCoord Coord) {
 func (rs Regions) UniteRegions(neighbourRegions *[]*Region, newFeature *Feature) {
 	unitedRegion := (*neighbourRegions)[0]
 	nr := *neighbourRegions
-	for i := 1; i <= len(nr); i++ {
-		for j := 0; j <= len(nr[i].Districts); j++ {
+	for i := 1; i < len(nr); i++ {
+		for j := 0; j < len(nr[i].Districts); j++ {
 			nr[i].Districts[j].Region = unitedRegion
 		}
 		unitedRegion.Districts = append(unitedRegion.Districts, nr[i].Districts...)
@@ -53,22 +54,22 @@ func (rs Regions) ManageRegions(b *Board, newTileCoord Coord) {
 
 	for dir := Top; dir <= Left; dir++ {
 		feature := newTile.FeatureByDirection(dir)
-		if feature.Type == FeatureCity || feature.Type == FeatureRoad {
-			neighbourTile, exists := b.GetTile(newTileCoord.CoordByDirection(dir))
-			if exists {
-				neighbourRegion, exists := FindNeighbourRegion(neighbourTile, dir)
-				if exists {
-					neighbourRegions[feature] = append(neighbourRegions[feature], neighbourRegion)
-				} else {
-					if _, exists := neighbourRegions[feature]; !exists {
-						neighbourRegions[feature] = nil
-					}
-				}
-			} else {
-				if _, exists := neighbourRegions[feature]; !exists {
-					neighbourRegions[feature] = nil
-				}
-			}
+		if feature.Type != FeatureCity && feature.Type != FeatureRoad {
+			continue
+		}
+		if _, ok := neighbourRegions[feature]; !ok {
+			neighbourRegions[feature] = nil
+		}
+		neighbourTile, exists := b.GetTile(newTileCoord.CoordByDirection(dir))
+		if !exists {
+			continue
+		}
+		neighbourRegion, exists := FindNeighbourRegion(neighbourTile, dir)
+		if !exists {
+			continue
+		}
+		if !slices.Contains(neighbourRegions[feature], neighbourRegion) {
+			neighbourRegions[feature] = append(neighbourRegions[feature], neighbourRegion)
 		}
 	}
 
