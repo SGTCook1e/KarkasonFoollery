@@ -19,13 +19,13 @@ type Region struct {
 	// Score    int
 }
 
-func MakeRegion(tile *Tile, feature *Feature, owner int) *Region {
+func MakeRegion(tile *Tile, feature *Feature, owner int, isMonastery bool) *Region {
 	r := &Region{
 		Districts: []*Feature{feature},
 		Owner:     owner,
 		Complete:  false,
 	}
-	if tile.Monastery {
+	if isMonastery {
 		r.Type = RegionMonastery
 	} else {
 		r.Type = RegionType(feature.Type)

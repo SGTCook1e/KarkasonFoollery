@@ -59,7 +59,7 @@ func (t *Tile) Clone() *Tile {
 }
 
 func LoadTiles() []*Tile {
-	file, err := os.Open("assets/data/test3.json")
+	file, err := os.Open("assets/data/tile_info.json")
 	if err != nil {
 		panic(err)
 	}

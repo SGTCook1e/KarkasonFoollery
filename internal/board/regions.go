@@ -6,9 +6,13 @@ import (
 
 type Regions map[*Region]struct{}
 
-func FindNeighbourRegion(neighbourTile *Tile, neighbourDir Direction) *Region {
+func FindNeighbourRegion(neighbourTile *Tile, neighbourDir Direction) (*Region, bool) {
 	feature := neighbourTile.FeatureByDirection(neighbourDir.Opposite())
-	return feature.Region
+	if feature.Region == nil {
+		return nil, false
+	} else {
+		return feature.Region, true
+	}
 }
 
 func (rs Regions) AppendRegion(newRegion *Region) {
@@ -36,36 +40,45 @@ func (rs Regions) UniteRegions(neighbourRegions *[]*Region, newFeature *Feature)
 func (rs Regions) ManageRegions(b *Board, newTileCoord Coord) {
 	newTile, exists := b.GetTile(newTileCoord)
 	if !exists {
-		panic(fmt.Errorf("Tile not present!"))
+		panic(fmt.Errorf("NewTile not present!"))
 	}
 
 	defer rs.ManageCompletion(b, newTile, newTileCoord)
 
 	if newTile.Monastery {
-		rs.AppendRegion(MakeRegion(newTile, nil, 1))
-		return
+		rs.AppendRegion(MakeRegion(newTile, nil, 1, true))
 	}
 	// Map for each feature side of newTile with its neighbours regions slice
 	neighbourRegions := make(map[*Feature][]*Region)
 
 	for dir := Top; dir <= Left; dir++ {
-		neighbourTile, exists := b.GetTile(newTileCoord.CoordByDirection(dir))
-		if exists {
-			feature := newTile.FeatureByDirection(dir)
-			if feature.Type == FeatureCity || feature.Type == FeatureRoad {
-				region := FindNeighbourRegion(neighbourTile, dir)
-				neighbourRegions[feature] = append(neighbourRegions[feature], region)
+		feature := newTile.FeatureByDirection(dir)
+		if feature.Type == FeatureCity || feature.Type == FeatureRoad {
+			neighbourTile, exists := b.GetTile(newTileCoord.CoordByDirection(dir))
+			if exists {
+				neighbourRegion, exists := FindNeighbourRegion(neighbourTile, dir)
+				if exists {
+					neighbourRegions[feature] = append(neighbourRegions[feature], neighbourRegion)
+				} else {
+					if _, exists := neighbourRegions[feature]; !exists {
+						neighbourRegions[feature] = nil
+					}
+				}
+			} else {
+				if _, exists := neighbourRegions[feature]; !exists {
+					neighbourRegions[feature] = nil
+				}
 			}
 		}
 	}
 
 	for feature, regions := range neighbourRegions {
 		switch len(regions) {
-		case 0:
-			rs.AppendRegion(MakeRegion(newTile, feature, 1))
-		case 1:
+		case 0: //If 0 regions found for feature, make a new region
+			rs.AppendRegion(MakeRegion(newTile, feature, 1, false))
+		case 1: //If 1 regions found for feature, append this feature to existing neighbour region
 			regions[0].ExpandRegion(feature)
-		default:
+		default: //If more than 1 regions found for feature, unite this regions and add feature to it
 			rs.UniteRegions(&regions, feature)
 		}
 	}
