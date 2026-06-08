@@ -570,11 +570,11 @@
     "sides": ["road", "city", "city", "city"],
     "features":[
       {
-        "type":"city",
+        "type":"road",
         "sides":[{"dir":"top"}]
       },
       {
-        "type":"field",
+        "type":"city",
         "sides":[{"dir":"right"},{"dir":"bottom"},{"dir":"left"}]
       }
     ]
@@ -586,11 +586,11 @@
     "features":[
       {
         "type": "field",
-        "sides": [{"dir":"right"},{"dir":"left"}]
+        "sides": [{"dir":"top"},{"dir":"right"}]
       },
       {
         "type": "road",
-        "sides":[{"dir":"top"},{"dir":"bottom"}]
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
       }
     ]
   },
@@ -812,11 +812,11 @@
     "features":[
       {
         "type": "field",
-        "sides": [{"dir":"right"},{"dir":"left"}]
+        "sides": [{"dir":"top"},{"dir":"right"}]
       },
       {
         "type": "road",
-        "sides":[{"dir":"top"},{"dir":"bottom"}]
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
       }
     ]
   },
@@ -1084,11 +1084,11 @@
     "features":[
       {
         "type": "field",
-        "sides": [{"dir":"right"},{"dir":"left"}]
+        "sides": [{"dir":"top"},{"dir":"right"}]
       },
       {
         "type": "road",
-        "sides":[{"dir":"top"},{"dir":"bottom"}]
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
       }
     ]
   },
@@ -1099,11 +1099,11 @@
     "features":[
       {
         "type": "field",
-        "sides": [{"dir":"right"},{"dir":"left"}]
+        "sides": [{"dir":"top"},{"dir":"right"}]
       },
       {
         "type": "road",
-        "sides":[{"dir":"top"},{"dir":"bottom"}]
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
       }
     ]
   },
@@ -1155,11 +1155,11 @@
     "sides": ["road", "city", "city", "city"],
     "features":[
       {
-        "type":"city",
+        "type":"road",
         "sides":[{"dir":"top"}]
       },
       {
-        "type":"field",
+        "type":"city",
         "sides":[{"dir":"right"},{"dir":"bottom"},{"dir":"left"}]
       }
     ]
@@ -1295,11 +1295,11 @@
     "sides": ["city", "city", "road", "city"],
     "features":[
       {
-        "type":"city",
+        "type":"road",
         "sides":[{"dir":"bottom"}]
       },
       {
-        "type":"field",
+        "type":"city",
         "sides":[{"dir":"right"},{"dir":"top"},{"dir":"left"}]
       }
     ]
@@ -1357,7 +1357,7 @@
       },
       {
         "type": "road",
-        "sides":[{"dir":"right"}]
+        "sides":[{"dir":"top"}]
       }
     ]
   },
@@ -1368,11 +1368,11 @@
     "features":[
       {
         "type": "field",
-        "sides": [{"dir":"right"},{"dir":"left"}]
+        "sides": [{"dir":"top"},{"dir":"right"}]
       },
       {
         "type": "road",
-        "sides":[{"dir":"top"},{"dir":"bottom"}]
+        "sides":[{"dir":"bottom"},{"dir":"left"}]
       }
     ]
   },
