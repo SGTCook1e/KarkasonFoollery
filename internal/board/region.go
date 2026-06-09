@@ -20,23 +20,25 @@ type Region struct {
 }
 
 func MakeRegion(tile *Tile, feature *Feature, owner int, isMonastery bool) *Region {
-	r := &Region{
+	if isMonastery {
+		return &Region{
+			Type:      RegionMonastery,
+			Districts: []*Feature{feature},
+			Owner:     owner,
+		}
+	}
+	r := Region{
+		Type:      RegionType(feature.Type),
 		Districts: []*Feature{feature},
 		Owner:     owner,
-		Complete:  false,
 	}
-	if isMonastery {
-		r.Type = RegionMonastery
-	} else {
-		r.Type = RegionType(feature.Type)
-		feature.Region = r
-	}
-	return r
+	feature.Region = &r
+	return &r
 }
 
 func (r *Region) ExpandRegion(newFeature *Feature) {
-	newFeature.Region = r
 	r.Districts = append(r.Districts, newFeature)
+	newFeature.Region = r
 }
 
 func (r *Region) UpdateCompletion() {

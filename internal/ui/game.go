@@ -2,12 +2,16 @@ package ui
 
 import (
 	"KarkasonFoollery/internal/board"
+	"fmt"
 	"math"
+	"math/rand"
+	"unsafe"
 
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 const tileSize = 256
@@ -81,7 +85,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		opts.GeoM.Translate(sxScreen, syScreen)
 
 		screen.DrawImage(img, opts)
-		//g.drawTileSideLabels(screen, t, worldX, worldY)
+		g.drawTileSideLabels(screen, t, worldX, worldY) //
+		g.drawRegionMarkers(screen, t, worldX, worldY)  //
 	}
 
 	// Draw preview last so it's on top of placed tiles
@@ -174,8 +179,72 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *board.Tile, worldX, w
 
 	for _, dir := range []board.Direction{board.Top, board.Right, board.Bottom, board.Left} {
 		label := string(t.SideAt(dir))
+		label = fmt.Sprintf("%s%d", label, t.ID)
 		sx, sy := g.worldToScreen(worldX+offsets[dir].x, worldY+offsets[dir].y)
 		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
+	}
+}
+
+func getColorFromPointer(ptr *board.Region) color.Color {
+	if ptr == nil {
+		return color.Transparent
+	}
+
+	addr := uint64(uintptr(unsafe.Pointer(ptr)))
+
+	src := rand.NewSource(int64(addr))
+	rnd := rand.New(src)
+
+	return color.RGBA{
+		R: uint8(rnd.Intn(156) + 100),
+		G: uint8(rnd.Intn(156) + 100),
+		B: uint8(rnd.Intn(156) + 100),
+		A: 240,
+	}
+}
+
+func (g *Game) calcFeatureCoords(worldX, worldY float64, f *board.Feature, t *board.Tile) (fx, fy float64) {
+	half := float64(tileSize) / 2.0
+	centerX := worldX + half
+	centerY := worldY + half
+
+	var dirX, dirY float64
+	for _, side := range f.Sides {
+		switch side.Direction.Rotate(t.Orientation) {
+		case board.Top:
+			dirY -= 1.0
+		case board.Right:
+			dirX += 1.0
+		case board.Bottom:
+			dirY += 1.0
+		case board.Left:
+			dirX -= 1.0
+		}
+	}
+
+	shiftDistance := float64(tileSize) * 0.22
+	featX := centerX + (dirX * shiftDistance)
+	featY := centerY + (dirY * shiftDistance)
+
+	return featX, featY
+}
+
+func (g *Game) drawRegionMarkers(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
+	for _, feature := range t.Features {
+		if feature.Region == nil {
+			continue
+		}
+
+		fx, fy := g.calcFeatureCoords(worldX, worldY, &feature, t)
+		sx, sy := g.worldToScreen(fx, fy)
+
+		regionColor := getColorFromPointer(feature.Region)
+		scaledSize := float32(40 * g.zoom)
+
+		sx = sx - 0.5*float64(scaledSize)
+		sy = sy - 0.5*float64(scaledSize)
+
+		vector.FillRect(screen, float32(sx), float32(sy), scaledSize, scaledSize, regionColor, true)
 	}
 }
 
