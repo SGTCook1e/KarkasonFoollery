@@ -37,6 +37,14 @@ func (c Coord) CoordByDirection(dir Direction) Coord {
 }
 
 func (c Coord) GetCoordsAround() []Coord {
-
-	return nil
+	return []Coord{
+		{X: c.X - 1, Y: c.Y - 1},
+		c.Top(),
+		{X: c.X + 1, Y: c.Y - 1},
+		c.Left(),
+		c.Right(),
+		{X: c.X - 1, Y: c.Y + 1},
+		c.Bottom(),
+		{X: c.X + 1, Y: c.Y + 1},
+	}
 }

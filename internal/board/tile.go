@@ -19,9 +19,10 @@ type Tile struct {
 	// 3 = 270°
 	Orientation Direction
 	// Sides are stored in tile order: Top, Right, Bottom, Left.
-	Sides     [4]SideType `json:"sides"`
-	Features  []Feature   `json:"features"`
-	Monastery bool        `json:"monastery"`
+	Sides           [4]SideType `json:"sides"`
+	Features        []Feature   `json:"features"`
+	Monastery       bool        `json:"monastery"`
+	MonasteryRegion *Region
 }
 
 func NewTile(id int, path string, sides [4]SideType) *Tile {
@@ -95,4 +96,14 @@ func (t *Tile) FeatureByDirection(direction Direction) *Feature {
 		}
 	}
 	return nil
+}
+
+func (t *Tile) CompleteFeaturesDirection(dir Direction) {
+	f := t.FeatureByDirection(dir)
+	for _, s := range f.Sides {
+		if s.Direction == dir {
+			s.Complete = true
+			return
+		}
+	}
 }

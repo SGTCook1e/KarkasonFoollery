@@ -21,11 +21,13 @@ type Region struct {
 
 func MakeRegion(tile *Tile, feature *Feature, owner int, isMonastery bool) *Region {
 	if isMonastery {
-		return &Region{
+		r := Region{
 			Type:      RegionMonastery,
 			Districts: []*Feature{feature},
 			Owner:     owner,
 		}
+		tile.MonasteryRegion = &r
+		return &r
 	}
 	r := Region{
 		Type:      RegionType(feature.Type),
@@ -34,6 +36,17 @@ func MakeRegion(tile *Tile, feature *Feature, owner int, isMonastery bool) *Regi
 	}
 	feature.Region = &r
 	return &r
+}
+
+func GetNumberOfTilesAround(b *Board, newTileCoords Coord) int {
+	var ctr int
+	for _, c := range newTileCoords.GetCoordsAround() {
+		_, exists := b.GetTile(c)
+		if exists {
+			ctr++
+		}
+	}
+	return ctr
 }
 
 func (r *Region) ExpandRegion(newFeature *Feature) {
@@ -51,4 +64,14 @@ func (r *Region) UpdateCompletion() {
 		}
 	}
 	r.Complete = true
+}
+
+func (r *Region) CompleteRegion(rs Regions) int {
+	if r.Type == RegionMonastery {
+		delete(rs, r)
+		return 8
+	}
+	score := len(r.Districts)
+	delete(rs, r)
+	return score
 }

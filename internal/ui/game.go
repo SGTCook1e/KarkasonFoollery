@@ -281,7 +281,7 @@ func (g *Game) Update() error {
 		if !exists {
 			if g.board.IsValidPlacement(coord, g.curentTile) {
 				g.board.PlaceTile(coord, g.curentTile.Clone())
-				g.regions.ManageRegions(g.board, coord)
+				g.regions.ManageRegions(g.board, coord, 1)
 				g.curentTile = g.deck.Draw()
 			}
 		}
