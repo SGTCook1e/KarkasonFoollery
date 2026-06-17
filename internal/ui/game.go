@@ -2,10 +2,10 @@ package ui
 
 import (
 	"KarkasonFoollery/internal/board"
+	"KarkasonFoollery/internal/game"
 	"fmt"
 	"math"
 	"math/rand"
-	"unsafe"
 
 	"image/color"
 
@@ -17,9 +17,8 @@ import (
 const tileSize = 256
 
 type Game struct {
-	board   *board.Board
-	regions *board.Regions
-	assets  *Assets
+	state  *game.GameState
+	assets *Assets
 
 	cameraX, cameraY float64
 	zoom             float64
@@ -34,21 +33,14 @@ type Game struct {
 	rotPressed bool
 
 	hoverX, hoverY int
-
-	// tiles []*tile.Tile
-	deck *board.Deck
 }
 
-func NewGame(b *board.Board, assets *Assets, deck *board.Deck) *Game {
-	firstTile := deck.Draw()
-
-	regions := make(board.Regions)
+func NewGame(state *game.GameState, assets *Assets) *Game {
+	firstTile := state.Deck.Draw()
 
 	return &Game{
-		board:      b,
-		regions:    &regions,
+		state:      state,
 		assets:     assets,
-		deck:       deck,
 		curentTile: firstTile,
 		// curentTileID: 0,
 		mousePressed: false,
@@ -63,7 +55,7 @@ func NewGame(b *board.Board, assets *Assets, deck *board.Deck) *Game {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawGrid(screen)
 
-	for coords, t := range g.board.GetTiles() {
+	for coords, t := range g.state.Board.GetTiles() {
 		img, ok := g.assets.Tiles[t.Texture[:len(t.Texture)-4]]
 		if !ok {
 			continue
@@ -162,7 +154,6 @@ func (g *Game) drawPreview(screen *ebiten.Image) {
 	opts.ColorScale.ScaleAlpha(0.5)
 	screen.DrawImage(img, &opts)
 	//g.drawTileSideLabels(screen, g.curentTile, worldX, worldY)
-
 }
 
 func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
@@ -185,14 +176,8 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *board.Tile, worldX, w
 	}
 }
 
-func getColorFromPointer(ptr *board.Region) color.Color {
-	if ptr == nil {
-		return color.Transparent
-	}
-
-	addr := uint64(uintptr(unsafe.Pointer(ptr)))
-
-	src := rand.NewSource(int64(addr))
+func getColorFromId(id int) color.Color {
+	src := rand.NewSource(int64(id))
 	rnd := rand.New(src)
 
 	return color.RGBA{
@@ -231,14 +216,14 @@ func (g *Game) calcFeatureCoords(worldX, worldY float64, f *board.Feature, t *bo
 
 func (g *Game) drawRegionMarkers(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
 	for _, feature := range t.Features {
-		if feature.Region == nil {
+		if feature.RegionID == board.NoRegion {
 			continue
 		}
 
 		fx, fy := g.calcFeatureCoords(worldX, worldY, &feature, t)
 		sx, sy := g.worldToScreen(fx, fy)
 
-		regionColor := getColorFromPointer(feature.Region)
+		regionColor := getColorFromId(int(feature.RegionID))
 		scaledSize := float32(40 * g.zoom)
 
 		sx = sx - 0.5*float64(scaledSize)
@@ -277,12 +262,13 @@ func (g *Game) Update() error {
 			X: boardX,
 			Y: boardY,
 		}
-		_, exists := g.board.GetTile(coord)
+		_, exists := g.state.Board.GetTile(coord)
 		if !exists {
-			if g.board.IsValidPlacement(coord, g.curentTile) {
-				g.board.PlaceTile(coord, g.curentTile.Clone())
-				g.regions.ManageRegions(g.board, coord, 1)
-				g.curentTile = g.deck.Draw()
+			if g.state.Board.IsValidPlacement(coord, g.curentTile) {
+				g.state.Board.PlaceTile(coord, g.curentTile.Clone())
+				result := game.AnalyzePlacement(*g.state, coord)
+				g.state.ApplyPlacement(result)
+				g.curentTile = g.state.Deck.Draw()
 			}
 		}
 	}

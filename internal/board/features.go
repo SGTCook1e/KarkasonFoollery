@@ -16,11 +16,10 @@ type Side struct {
 }
 
 type Feature struct {
-	Region   *Region
+	RegionID RegionID
 	Type     FeatureType `json:"type"`
 	Unit     UnitType
 	Sides    []Side `json:"sides"`
-	Complete bool
 }
 
 func (f *Feature) HasSide(dir Direction) bool {
@@ -32,14 +31,14 @@ func (f *Feature) HasSide(dir Direction) bool {
 	return false
 }
 
-func (f *Feature) UpdateCompletion() {
-	if f.Complete {
-		return
-	}
-	for _, side := range f.Sides {
-		if !side.Complete {
-			return
+func (f *Feature) IsOtherSidesComplete(dir Direction) bool {
+	for _, s := range f.Sides {
+		if s.Direction == dir {
+			continue
+		}
+		if !s.Complete {
+			return false
 		}
 	}
-	f.Complete = true
+	return true
 }

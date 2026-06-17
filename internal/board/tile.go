@@ -19,10 +19,9 @@ type Tile struct {
 	// 3 = 270°
 	Orientation Direction
 	// Sides are stored in tile order: Top, Right, Bottom, Left.
-	Sides           [4]SideType `json:"sides"`
-	Features        []Feature   `json:"features"`
-	Monastery       bool        `json:"monastery"`
-	MonasteryRegion *Region
+	Sides     [4]SideType `json:"sides"`
+	Features  []Feature   `json:"features"`
+	Monastery bool        `json:"monastery"`
 }
 
 func NewTile(id int, path string, sides [4]SideType) *Tile {
@@ -48,7 +47,6 @@ func (t *Tile) Clone() *Tile {
 
 		for i, feature := range t.Features {
 			clone.Features[i] = feature
-			clone.Features[i].Region = nil
 
 			if feature.Sides != nil {
 				clone.Features[i].Sides = make([]Side, len(feature.Sides))
@@ -88,22 +86,21 @@ func (t *Tile) Rotate() {
 	t.Orientation = (t.Orientation + 1) % 4
 }
 
-func (t *Tile) FeatureByDirection(direction Direction) *Feature {
+func (t *Tile) FeatureByDirection(direction Direction) (*Feature, int) {
 	rotatedDir := Direction((int(direction) - int(t.Orientation) + 4) % 4)
 	for i := range t.Features {
 		if t.Features[i].HasSide(rotatedDir) {
-			return &t.Features[i]
+			return &t.Features[i], i
 		}
 	}
-	return nil
+	return &Feature{}, -1
 }
 
-func (t *Tile) CompleteFeaturesDirection(dir Direction) {
-	f := t.FeatureByDirection(dir)
-	for _, s := range f.Sides {
-		if s.Direction == dir {
-			s.Complete = true
-			return
+func (t *Tile) CompleteSide(dir Direction) {
+	f, _ := t.FeatureByDirection(dir)
+	for _, side := range f.Sides {
+		if side.Direction == dir {
+			side.Complete = true
 		}
 	}
 }

@@ -1,17 +1,20 @@
-package board
+package game
 
-import "math/rand/v2"
+import (
+	b "KarkasonFoollery/internal/board"
+	"math/rand/v2"
+)
 
 type Deck struct {
-	tiles []*Tile
+	tiles []*b.Tile
 }
 
-func NewDeck(tiles []*Tile) *Deck {
-	var startRiver *Tile
-	var endRiver *Tile
+func NewDeck(tiles []*b.Tile) *Deck {
+	var startRiver *b.Tile
+	var endRiver *b.Tile
 
-	var riverTiles []*Tile
-	var otherTiles []*Tile
+	var riverTiles []*b.Tile
+	var otherTiles []*b.Tile
 
 	startRiver = tiles[0].Clone()
 	endRiver = tiles[11].Clone()
@@ -24,7 +27,7 @@ func NewDeck(tiles []*Tile) *Deck {
 	shuffleTiles(riverTiles)
 	shuffleTiles(otherTiles)
 
-	var returnTiles []*Tile
+	var returnTiles []*b.Tile
 
 	returnTiles = append(returnTiles, startRiver)
 	returnTiles = append(returnTiles, riverTiles...)
@@ -36,7 +39,7 @@ func NewDeck(tiles []*Tile) *Deck {
 	}
 }
 
-func shuffleTiles(tiles []*Tile) {
+func shuffleTiles(tiles []*b.Tile) {
 	// Implement a shuffling algorithm, such as Fisher-Yates
 	for i := len(tiles) - 1; i > 0; i-- {
 		j := rand.IntN(i)
@@ -44,9 +47,9 @@ func shuffleTiles(tiles []*Tile) {
 	}
 }
 
-func (d *Deck) Draw() *Tile {
+func (d *Deck) Draw() *b.Tile {
 	if len(d.tiles) == 0 {
-		return &Tile{}
+		return &b.Tile{}
 	}
 	t := d.tiles[0]
 	d.tiles = d.tiles[1:]

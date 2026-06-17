@@ -14,6 +14,22 @@ const (
 	River SideType = "river"
 )
 
+type UnitType string
+
+const (
+	NoUnit  UnitType = ""
+	Peasant UnitType = "peasant"
+	Priest  UnitType = "priest"
+)
+
+type RegionID int
+
+const NoRegion = 0
+
+type OwnerID int
+
+const NoOwner = -1
+
 type Direction int
 
 const (
@@ -47,11 +63,3 @@ func (d *Direction) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
-
-type UnitType string
-
-const (
-	NoneUnit UnitType = ""
-	Peasant  UnitType = "peasant"
-	Priest   UnitType = "priest"
-)
