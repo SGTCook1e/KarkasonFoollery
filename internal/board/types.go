@@ -9,18 +9,18 @@ const (
 	River SideType = "river"
 )
 
-type UnitType string
+type MeepleType string
 
 const (
-	NoUnit  UnitType = ""
-	Peasant UnitType = "peasant"
-	Priest  UnitType = "priest"
+	NoUnit  MeepleType = ""
+	Peasant MeepleType = "peasant"
+	Priest  MeepleType = "priest"
 )
 
 type RegionID int
 
 const NoRegion = 0
 
-type OwnerID int
+type PlayerID int
 
 const NoOwner = -1

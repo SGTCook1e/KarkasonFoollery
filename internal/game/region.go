@@ -20,11 +20,11 @@ type Region struct {
 	ID        b.RegionID
 	Type      RegionType
 	Districts []FeatureRef
-	Owner     b.OwnerID
+	Owner     b.PlayerID
 	// Score    int
 }
 
-func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, isMonastery bool, owner b.OwnerID) Region {
+func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, isMonastery bool, owner b.PlayerID) Region {
 	if isMonastery {
 		r := Region{
 			Type:      RegionMonastery,

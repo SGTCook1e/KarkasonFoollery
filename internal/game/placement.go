@@ -12,7 +12,7 @@ type PlacementResult struct {
 	Coord               b.Coord
 	SidesToComplete     []b.Direction
 	DistrictsToComplete []FeatureRef
-	Owner               b.OwnerID
+	Owner               b.PlayerID
 }
 
 func NewPlacementResult(coord b.Coord, tile b.Tile) PlacementResult {

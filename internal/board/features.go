@@ -18,7 +18,7 @@ type Side struct {
 type Feature struct {
 	RegionID RegionID
 	Type     FeatureType `json:"type"`
-	Unit     UnitType
+	Meeple   MeepleType
 	Sides    []Side `json:"sides"`
 }
 
