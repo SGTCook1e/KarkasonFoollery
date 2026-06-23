@@ -98,9 +98,9 @@ func (t *Tile) FeatureByDirection(direction Direction) (*Feature, int) {
 
 func (t *Tile) CompleteSide(dir Direction) {
 	f, _ := t.FeatureByDirection(dir)
-	for _, side := range f.Sides {
-		if side.Direction == dir {
-			side.Complete = true
+	for i := range f.Sides {
+		if f.Sides[i].Direction == dir {
+			f.Sides[i].Complete = true
 		}
 	}
 }

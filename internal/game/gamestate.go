@@ -21,9 +21,9 @@ func (s *GameState) CompleteDistrict(dist FeatureRef) {
 	t, _ := s.Board.GetTile(dist.Coord)
 	id := t.Features[dist.Index].RegionID
 	r := s.Regions.byID[id]
-	for _, d := range r.Districts {
-		if d.Index == dist.Index {
-			d.Complete = true
+	for i := range r.Districts {
+		if r.Districts[i].Index == dist.Index {
+			r.Districts[i].Complete = true
 			return
 		}
 	}
