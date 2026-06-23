@@ -41,13 +41,16 @@ func AnalyzePlacement(state GameState, newCoord b.Coord) PlacementResult {
 		if !exists {
 			continue
 		}
+
 		result.SidesToComplete = append(result.SidesToComplete, dir)
 		if feature.IsOtherSidesComplete(dir) {
-			result.DistrictsToComplete = append(result.DistrictsToComplete, FeatureRef{Index: index, Coord: newCoord})
+			dist := FeatureRef{Index: index, Coord: newCoord}
+			result.DistrictsToComplete = append(result.DistrictsToComplete, dist)
 		}
 		neighbourFeature, i := neighbourTile.FeatureByDirection(dir.Opposite())
 		if neighbourFeature.IsOtherSidesComplete(dir.Opposite()) {
-			result.DistrictsToComplete = append(result.DistrictsToComplete, FeatureRef{Index: i, Coord: neighbourCoord})
+			dist := FeatureRef{Index: i, Coord: neighbourCoord}
+			result.DistrictsToComplete = append(result.DistrictsToComplete, dist)
 		}
 
 		neighbourRegion, exists := FindNeighbourRegionID(*neighbourTile, dir)
@@ -60,9 +63,4 @@ func AnalyzePlacement(state GameState, newCoord b.Coord) PlacementResult {
 	}
 
 	return result
-
-	// найти соседние регионы
-	// определить какие регионы создать/объединить
-	// определить completed regions
-	// вернуть PlacementResult
 }

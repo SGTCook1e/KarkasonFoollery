@@ -93,7 +93,7 @@ func (t *Tile) FeatureByDirection(direction Direction) (*Feature, int) {
 			return &t.Features[i], i
 		}
 	}
-	return &Feature{}, -1
+	panic(fmt.Sprintf("Feature not present in Tile %d by Direction %d", t.ID, direction))
 }
 
 func (t *Tile) CompleteSide(dir Direction) {
@@ -103,4 +103,8 @@ func (t *Tile) CompleteSide(dir Direction) {
 			f.Sides[i].Complete = true
 		}
 	}
+}
+
+func (t *Tile) UpdateRegionId(featId int, regId RegionID) {
+	t.Features[featId].RegionID = regId
 }

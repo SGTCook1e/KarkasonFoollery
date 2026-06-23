@@ -39,11 +39,11 @@ func (rs *Regions) AppendRegion(r Region) b.RegionID {
 	return id
 }
 
-func (rs *Regions) UniteRegions(coords b.Coord, newFeature int, RegionIds []b.RegionID) {
-	targetId := RegionIds[0]
-	for i := 1; i < len(RegionIds); i++ {
-		rs.byID[targetId].Districts = append(rs.byID[targetId].Districts, rs.byID[RegionIds[i]].Districts...)
-		rs.DeleteRegion(RegionIds[i])
+func (rs *Regions) MergeRegions(coords b.Coord, newFeature int, regionIds []b.RegionID) {
+	targetId := regionIds[0]
+	for i := 1; i < len(regionIds); i++ {
+		rs.byID[targetId].Districts = append(rs.byID[targetId].Districts, rs.byID[regionIds[i]].Districts...)
+		rs.DeleteRegion(regionIds[i])
 	}
 	rs.byID[targetId].ExpandRegion(coords, newFeature)
 }

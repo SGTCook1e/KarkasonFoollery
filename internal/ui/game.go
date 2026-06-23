@@ -28,8 +28,8 @@ type Game struct {
 
 	cameraSpeed float64
 
-	curentTile *board.Tile
-	// curentTileID int
+	currentTile *board.Tile
+	// currentTileID int
 	rotPressed bool
 
 	hoverX, hoverY int
@@ -39,9 +39,9 @@ func NewGame(state *game.GameState, assets *Assets) *Game {
 	firstTile := state.Deck.Draw()
 
 	return &Game{
-		state:      state,
-		assets:     assets,
-		curentTile: firstTile,
+		state:       state,
+		assets:      assets,
+		currentTile: firstTile,
 		// curentTileID: 0,
 		mousePressed: false,
 		cameraSpeed:  10,
@@ -122,11 +122,11 @@ func (g *Game) drawGrid(screen *ebiten.Image) {
 }
 
 func (g *Game) drawPreview(screen *ebiten.Image) {
-	if g.curentTile == nil || g.curentTile.Texture == "" {
+	if g.currentTile == nil || g.currentTile.Texture == "" {
 		return
 	}
 
-	img, ok := g.assets.Tiles[g.curentTile.Texture[:len(g.curentTile.Texture)-4]]
+	img, ok := g.assets.Tiles[g.currentTile.Texture[:len(g.currentTile.Texture)-4]]
 	if !ok {
 		return
 	}
@@ -144,7 +144,7 @@ func (g *Game) drawPreview(screen *ebiten.Image) {
 	half := float64(tileSize) / 2
 	opts := ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(-half, -half)
-	opts.GeoM.Rotate(float64(g.curentTile.Orientation) * math.Pi / 2)
+	opts.GeoM.Rotate(float64(g.currentTile.Orientation) * math.Pi / 2)
 	opts.GeoM.Translate(half, half)
 
 	opts.GeoM.Scale(g.zoom, g.zoom)
@@ -264,11 +264,13 @@ func (g *Game) Update() error {
 		}
 		_, exists := g.state.Board.GetTile(coord)
 		if !exists {
-			if g.state.Board.IsValidPlacement(coord, g.curentTile) {
-				g.state.Board.PlaceTile(coord, g.curentTile.Clone())
+			if g.state.Board.IsValidPlacement(coord, g.currentTile) {
+				g.state.Board.PlaceTile(coord, g.currentTile.Clone())
+
 				result := game.AnalyzePlacement(*g.state, coord)
 				g.state.ApplyPlacement(result)
-				g.curentTile = g.state.Deck.Draw()
+
+				g.currentTile = g.state.Deck.Draw()
 			}
 		}
 	}
@@ -317,7 +319,7 @@ func (g *Game) Update() error {
 
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		if !g.rotPressed {
-			g.curentTile.Rotate()
+			g.currentTile.Rotate()
 			g.rotPressed = true
 		}
 	} else {

@@ -46,21 +46,23 @@ func (s *GameState) ApplyPlacement(res PlacementResult) {
 	}
 
 	if tile.Monastery {
-		s.Regions.AppendRegion(MakeRegion(res.Coord, 0, b.FeatureMonastery, true, res.Owner))
+		newReg := MakeRegion(res.Coord, 0, b.FeatureMonastery, true, res.Owner)
+		s.Regions.AppendRegion(newReg)
 	}
 	for featId, regIds := range res.RegionsByFeature {
 		switch len(regIds) {
 		case 0: //If 0 regions found for feature, make a new region
-			id := s.Regions.AppendRegion(MakeRegion(res.Coord, featId, tile.Features[featId].Type, false, res.Owner))
-			tile.Features[featId].RegionID = id
+			newReg := MakeRegion(res.Coord, featId, tile.Features[featId].Type, false, res.Owner)
+			id := s.Regions.AppendRegion(newReg)
+			tile.UpdateRegionId(featId, id)
 		case 1: //If 1 regions found for feature, append this feature to existing neighbour region
 			s.Regions.byID[regIds[0]].ExpandRegion(res.Coord, featId)
-			tile.Features[featId].RegionID = regIds[0]
+			tile.UpdateRegionId(featId, regIds[0])
 		default: //If more than 1 regions found for feature, unite this regions and add feature to it
 			targetRegId := regIds[0]
 			s.UpdateTilesRegionIds(regIds[1:], targetRegId)
-			s.Regions.UniteRegions(res.Coord, featId, regIds)
-			tile.Features[featId].RegionID = targetRegId
+			s.Regions.MergeRegions(res.Coord, featId, regIds)
+			tile.UpdateRegionId(featId, targetRegId)
 		}
 	}
 
