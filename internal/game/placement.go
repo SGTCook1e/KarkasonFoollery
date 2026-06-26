@@ -22,7 +22,7 @@ func ResolvePlacement(state GameState, owner b.PlayerID) GameState {
 	result.RegionsByFeature = analyzeRegionsPlacement(state)
 	result.Completion = analyzeCompletion(state)
 
-	draft := state.Clone()
+	draft := state.makeStateDraft()
 	draft.applyRegionsPlacement(result, owner)
 	draft.applyCompletion(result, owner)
 

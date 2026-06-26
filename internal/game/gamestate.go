@@ -27,7 +27,7 @@ func NewState(tiles []*b.Tile) *GameState {
 	return s
 }
 
-func (s *GameState) Clone() GameState {
+func (s *GameState) makeStateDraft() GameState {
 	return GameState{
 		Board:     s.Board.Clone(),
 		Regions:   s.Regions.Clone(),
