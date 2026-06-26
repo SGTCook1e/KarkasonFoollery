@@ -18,6 +18,20 @@ func NewBoard() *Board {
 	}
 }
 
+func (b *Board) Clone() Board {
+	clone := Board{
+		tiles: make(map[Coord]*Tile, len(b.tiles)),
+	}
+
+	for coord, tile := range b.tiles {
+		if tile != nil {
+			clone.tiles[coord] = tile.Clone()
+		}
+	}
+
+	return clone
+}
+
 func (b *Board) PlaceTile(c Coord, t *Tile) {
 	b.tiles[c] = t
 }
@@ -57,7 +71,7 @@ func (b *Board) CanPlaceTile(c Coord) bool {
 	return false
 }
 
-func (b *Board) IsValidPlacement(c Coord, t *Tile) bool {
+func (b *Board) IsValidPlacement(c Coord, t Tile) bool {
 	if len(b.tiles) == 0 {
 		return true
 	}

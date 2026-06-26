@@ -3,21 +3,24 @@ package ui
 import (
 	"KarkasonFoollery/internal/board"
 	"KarkasonFoollery/internal/game"
-	"fmt"
 	"math"
-	"math/rand"
-
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+)
+
+type turnPhase string
+
+const (
+	AwaitingTile       turnPhase = "AwaitingTile"
+	AwaitingMeeple     turnPhase = "AwaitingMeeple"
+	ResolvingPlacement turnPhase = "ResolvingPlacement"
 )
 
 const tileSize = 256
 
 type Game struct {
 	state  *game.GameState
+	phase  turnPhase
 	assets *Assets
 
 	cameraX, cameraY float64
@@ -28,21 +31,17 @@ type Game struct {
 
 	cameraSpeed float64
 
-	currentTile *board.Tile
-	// currentTileID int
-	rotPressed bool
-
 	hoverX, hoverY int
+
+	rotPressed bool
 }
 
 func NewGame(state *game.GameState, assets *Assets) *Game {
-	firstTile := state.Deck.Draw()
-
+	TRACKED = state //
 	return &Game{
-		state:       state,
-		assets:      assets,
-		currentTile: firstTile,
-		// curentTileID: 0,
+		state:        state,
+		phase:        AwaitingTile,
+		assets:       assets,
 		mousePressed: false,
 		cameraSpeed:  10,
 		//1=100% zoom
@@ -52,37 +51,21 @@ func NewGame(state *game.GameState, assets *Assets) *Game {
 	}
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	g.drawGrid(screen)
+func (g *Game) Update() error {
+	g.updateHover()
+	g.updateCamera()
+	g.updateRotation()
 
-	for coords, t := range g.state.Board.GetTiles() {
-		img, ok := g.assets.Tiles[t.Texture[:len(t.Texture)-4]]
-		if !ok {
-			continue
-		}
-
-		worldX := float64(coords.X * tileSize)
-		worldY := float64(coords.Y * tileSize)
-
-		opts := &ebiten.DrawImageOptions{}
-		// Rotate around the tile center in local space
-		half := float64(tileSize) / 2
-		opts.GeoM.Translate(-half, -half)
-		opts.GeoM.Rotate(float64(t.Orientation) * math.Pi / 2)
-		opts.GeoM.Translate(half, half)
-
-		// Scale and then translate to screen coordinates
-		opts.GeoM.Scale(g.zoom, g.zoom)
-		sxScreen, syScreen := g.worldToScreen(worldX, worldY)
-		opts.GeoM.Translate(sxScreen, syScreen)
-
-		screen.DrawImage(img, opts)
-		g.drawTileSideLabels(screen, t, worldX, worldY) //
-		g.drawRegionMarkers(screen, t, worldX, worldY)  //
+	switch g.phase {
+	case AwaitingTile:
+		g.handleTilePlacementInput()
+	case AwaitingMeeple:
+		g.handleMeeplePlacementInput()
+	case ResolvingPlacement:
+		g.handlePlacementResolve()
 	}
 
-	// Draw preview last so it's on top of placed tiles
-	g.drawPreview(screen)
+	return nil
 }
 
 func (g *Game) worldBounds(screenW, screenH int) (float64, float64, float64, float64) {
@@ -97,98 +80,7 @@ func (g *Game) worldBounds(screenW, screenH int) (float64, float64, float64, flo
 	return left, top, right, bottom
 }
 
-func (g *Game) drawGrid(screen *ebiten.Image) {
-	left, top, right, bottom := g.worldBounds(1280, 720)
-
-	startX := int(left) / tileSize * tileSize
-	endX := int(right)/tileSize*tileSize + tileSize
-
-	startY := int(top) / tileSize * tileSize
-	endY := int(bottom)/tileSize*tileSize + tileSize
-
-	for x := startX; x <= endX; x += tileSize {
-		g.drawLine(screen,
-			float64(x), top,
-			float64(x), bottom,
-		)
-	}
-
-	for y := startY; y <= endY; y += tileSize {
-		g.drawLine(screen,
-			left, float64(y),
-			right, float64(y),
-		)
-	}
-}
-
-func (g *Game) drawPreview(screen *ebiten.Image) {
-	if g.currentTile == nil || g.currentTile.Texture == "" {
-		return
-	}
-
-	img, ok := g.assets.Tiles[g.currentTile.Texture[:len(g.currentTile.Texture)-4]]
-	if !ok {
-		return
-	}
-
-	mx, my := ebiten.CursorPosition()
-	worldX, worldY := g.screenToWorld(mx, my)
-
-	cellX := math.Floor(worldX / tileSize)
-	cellY := math.Floor(worldY / tileSize)
-	// левый верхний угол клетки в WORLD координатах (привязка к сетке)
-	worldX = cellX * tileSize
-	worldY = cellY * tileSize
-
-	// Rotate around the tile center in local space, then scale and position
-	half := float64(tileSize) / 2
-	opts := ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(-half, -half)
-	opts.GeoM.Rotate(float64(g.currentTile.Orientation) * math.Pi / 2)
-	opts.GeoM.Translate(half, half)
-
-	opts.GeoM.Scale(g.zoom, g.zoom)
-	sxScreen, syScreen := g.worldToScreen(worldX, worldY)
-	opts.GeoM.Translate(sxScreen, syScreen)
-
-	opts.ColorScale.ScaleAlpha(0.5)
-	screen.DrawImage(img, &opts)
-	//g.drawTileSideLabels(screen, g.curentTile, worldX, worldY)
-}
-
-func (g *Game) drawTileSideLabels(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
-	if g.zoom < 0.25 {
-		return
-	}
-
-	offsets := map[board.Direction]struct{ x, y float64 }{
-		board.Top:    {x: tileSize*0.5 - 28, y: 8},
-		board.Right:  {x: tileSize - 92, y: tileSize*0.5 - 8},
-		board.Bottom: {x: tileSize*0.5 - 28, y: tileSize - 24},
-		board.Left:   {x: 8, y: tileSize*0.5 - 8},
-	}
-
-	for _, dir := range []board.Direction{board.Top, board.Right, board.Bottom, board.Left} {
-		label := string(t.SideAt(dir))
-		label = fmt.Sprintf("%s%d", label, t.ID)
-		sx, sy := g.worldToScreen(worldX+offsets[dir].x, worldY+offsets[dir].y)
-		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
-	}
-}
-
-func getColorFromId(id int) color.Color {
-	src := rand.NewSource(int64(id))
-	rnd := rand.New(src)
-
-	return color.RGBA{
-		R: uint8(rnd.Intn(156) + 100),
-		G: uint8(rnd.Intn(156) + 100),
-		B: uint8(rnd.Intn(156) + 100),
-		A: 240,
-	}
-}
-
-func (g *Game) calcFeatureCoords(worldX, worldY float64, f *board.Feature, t *board.Tile) (fx, fy float64) {
+func (g *Game) calcFeatureCoords(worldX, worldY float64, f board.Feature, t board.Tile) (fx, fy float64) {
 	half := float64(tileSize) / 2.0
 	centerX := worldX + half
 	centerY := worldY + half
@@ -214,94 +106,21 @@ func (g *Game) calcFeatureCoords(worldX, worldY float64, f *board.Feature, t *bo
 	return featX, featY
 }
 
-func (g *Game) drawRegionMarkers(screen *ebiten.Image, t *board.Tile, worldX, worldY float64) {
-	for _, feature := range t.Features {
-		if feature.RegionID == board.NoRegion {
-			continue
-		}
-
-		fx, fy := g.calcFeatureCoords(worldX, worldY, &feature, t)
-		sx, sy := g.worldToScreen(fx, fy)
-
-		regionColor := getColorFromId(int(feature.RegionID))
-		scaledSize := float32(40 * g.zoom)
-
-		sx = sx - 0.5*float64(scaledSize)
-		sy = sy - 0.5*float64(scaledSize)
-
-		vector.FillRect(screen, float32(sx), float32(sy), scaledSize, scaledSize, regionColor, true)
-	}
-}
-
-func (g *Game) drawLine(screen *ebiten.Image, x1, y1, x2, y2 float64) {
-	sx1, sy1 := g.worldToScreen(x1, y1)
-	sx2, sy2 := g.worldToScreen(x2, y2)
-
-	ebitenutil.DrawLine(screen, sx1, sy1, sx2, sy2, color.RGBA{R: 51, G: 51, B: 51, A: 172})
-}
-
-func (g *Game) Update() error {
+func (g *Game) updateHover() {
 	mx, my := ebiten.CursorPosition()
-	worldX, worldY := g.screenToWorld(mx, my)
+	worldX, worldY := g.screenToGridFloor(mx, my)
 
-	boardX := int(math.Floor(worldX / tileSize))
-	boardY := int(math.Floor(worldY / tileSize))
+	g.hoverX = worldX
+	g.hoverY = worldY
+}
 
-	g.hoverX = boardX
-	g.hoverY = boardY
+func (g *Game) updateCamera() {
 	speed := g.cameraSpeed / g.zoom
-	pressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
-	if pressed && !g.mousePressed {
-		g.mousePressed = true
-		g.mouseX, g.mouseY = ebiten.CursorPosition()
-
-		worldX, worldY := g.screenToWorld(g.mouseX, g.mouseY)
-		boardX := int(math.Floor(worldX / tileSize))
-		boardY := int(math.Floor(worldY / tileSize))
-		coord := board.Coord{
-			X: boardX,
-			Y: boardY,
-		}
-		_, exists := g.state.Board.GetTile(coord)
-		if !exists {
-			if g.state.Board.IsValidPlacement(coord, g.currentTile) {
-				g.state.Board.PlaceTile(coord, g.currentTile.Clone())
-
-				result := game.AnalyzePlacement(*g.state, coord)
-				g.state.ApplyPlacement(result)
-
-				g.currentTile = g.state.Deck.Draw()
-			}
-		}
-	}
-	if !pressed {
-		g.mousePressed = false
-	}
-
 	_, wheelY := ebiten.Wheel()
 
 	if wheelY != 0 {
-		mx, my := ebiten.CursorPosition()
-
-		worldX := float64(mx)/g.zoom + g.cameraX
-		worldY := float64(my)/g.zoom + g.cameraY
-
-		if wheelY > 0 {
-			g.zoom *= 1.1
-		} else {
-			g.zoom *= 0.9
-		}
-
-		if g.zoom < 0.2 {
-			g.zoom = 0.2
-		}
-		if g.zoom > 4.0 {
-			g.zoom = 4.0
-		}
-
-		g.cameraX = worldX - float64(mx)/g.zoom
-		g.cameraY = worldY - float64(my)/g.zoom
-		return nil
+		g.zoomAtCursor(wheelY)
+		return
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
@@ -316,17 +135,110 @@ func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
 		g.cameraX += speed
 	}
+}
 
+func (g *Game) zoomAtCursor(wheelY float64) {
+	mx, my := ebiten.CursorPosition()
+
+	worldX := float64(mx)/g.zoom + g.cameraX
+	worldY := float64(my)/g.zoom + g.cameraY
+
+	if wheelY > 0 {
+		g.zoom *= 1.1
+	} else {
+		g.zoom *= 0.9
+	}
+
+	if g.zoom < 0.2 {
+		g.zoom = 0.2
+	}
+	if g.zoom > 4.0 {
+		g.zoom = 4.0
+	}
+
+	g.cameraX = worldX - float64(mx)/g.zoom
+	g.cameraY = worldY - float64(my)/g.zoom
+}
+
+func (g *Game) handleTilePlacementInput() {
+	if !g.consumeLeftClick() {
+		return
+	}
+
+	coord := g.cursorCoord()
+
+	if _, exists := g.state.Board.GetTile(coord); exists {
+		return
+	}
+
+	if !g.state.Board.IsValidPlacement(coord, g.state.TopTile) {
+		return
+	}
+
+	tile := g.state.TopTile.Clone()
+
+	g.state.Board.PlaceTile(coord, tile)
+	g.state.CurrCoord = coord
+	g.state.TopTile = g.state.Deck.Draw()
+
+	g.phase = AwaitingMeeple
+}
+
+func (g *Game) handleMeeplePlacementInput() {
+	if !g.consumeLeftClick() {
+		return
+	}
+
+	g.phase = ResolvingPlacement
+}
+
+func (g *Game) handlePlacementResolve() {
+	result := game.ResolvePlacement(*g.state, 1)
+	g.state.ApplyPlacement(result, 1)
+
+	g.phase = AwaitingTile
+}
+
+func (g *Game) cursorCoord() board.Coord {
+	mx, my := ebiten.CursorPosition()
+	x, y := g.screenToGridFloor(mx, my)
+
+	return board.Coord{X: x, Y: y}
+}
+
+func (g *Game) screenToGridFloor(x, y int) (int, int) {
+	wx, wy := g.screenToWorld(x, y)
+
+	return int(math.Floor(wx / tileSize)), int(math.Floor(wy / tileSize))
+}
+
+func (g *Game) consumeLeftClick() bool {
+	pressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+
+	if !pressed {
+		g.mousePressed = false
+		return false
+	}
+
+	if g.mousePressed {
+		return false
+	}
+
+	g.mousePressed = true
+	g.mouseX, g.mouseY = ebiten.CursorPosition()
+
+	return true
+}
+
+func (g *Game) updateRotation() {
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		if !g.rotPressed {
-			g.currentTile.Rotate()
+			g.state.TopTile.Rotate()
 			g.rotPressed = true
 		}
 	} else {
 		g.rotPressed = false
 	}
-
-	return nil
 }
 
 func (g *Game) Layout(outerWidth, outerHeight int) (int, int) {

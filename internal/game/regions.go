@@ -16,6 +16,22 @@ func NewRegions() *Regions {
 	}
 }
 
+func (rs *Regions) Clone() Regions {
+	clone := Regions{
+		nextID: rs.nextID,
+		byID:   make(map[b.RegionID]*Region, len(rs.byID)),
+	}
+
+	for id, region := range rs.byID {
+		if region != nil {
+			regionClone := region.Clone()
+			clone.byID[id] = &regionClone
+		}
+	}
+
+	return clone
+}
+
 func FindNeighbourRegionID(neighbourTile b.Tile, neighbourDir b.Direction) (b.RegionID, bool) {
 	feature, _ := neighbourTile.FeatureByDirection(neighbourDir.Opposite())
 	if feature.RegionID == b.NoRegion {

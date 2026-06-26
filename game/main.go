@@ -17,8 +17,7 @@ func main() {
 	tiles := board.LoadTiles()
 
 	state := game.NewState(tiles)
-	trackedRegions = &state.Regions //
-	game := ui.NewGame(&state, assets)
+	game := ui.NewGame(state, assets)
 
 	ebiten.SetWindowSize(1280, 720)
 	ebiten.SetWindowTitle("Karkason Foollery")

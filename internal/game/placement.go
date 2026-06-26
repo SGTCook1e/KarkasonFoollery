@@ -6,61 +6,96 @@ import (
 	"slices"
 )
 
-type PlacementResult struct {
+type AnalysisResult struct {
 	// Map for each feature index of newTile with its neighbours regions slice
-	RegionsByFeature    map[int][]b.RegionID
-	Coord               b.Coord
+	RegionsByFeature map[int][]b.RegionID
+	Completion       Completion
+}
+
+type Completion struct {
 	SidesToComplete     []b.Direction
 	DistrictsToComplete []FeatureRef
-	Owner               b.PlayerID
 }
 
-func NewPlacementResult(coord b.Coord, tile b.Tile) PlacementResult {
-	return PlacementResult{Coord: coord,
-		RegionsByFeature: make(map[int][]b.RegionID)}
+func ResolvePlacement(state GameState, owner b.PlayerID) GameState {
+	var result AnalysisResult
+	result.RegionsByFeature = analyzeRegionsPlacement(state)
+	result.Completion = analyzeCompletion(state)
+
+	draft := state.Clone()
+	draft.ApplyRegionsPlacement(result, owner)
+	draft.ApplyCompletion(result, owner)
+
+	effects := ResolvePlacementEffects(draft)
+	draft.ApplyScoring(effects.PointsToScore)
+	draft.ReturnMeeples(effects.MeeplesToReturn)
+	draft.CompleteRegions(effects.RegionsToComplete)
+
+	return draft
 }
 
-func AnalyzePlacement(state GameState, newCoord b.Coord) PlacementResult {
-	newTile, exists := state.Board.GetTile(newCoord)
+func analyzeCompletion(state GameState) Completion {
+	tile, exists := state.Board.GetTile(state.CurrCoord)
 	if !exists {
-		panic(fmt.Errorf("NewTile not present!"))
+		panic(fmt.Sprintf("Tile on %+v does not exist!", state.CurrCoord))
 	}
 
-	result := NewPlacementResult(newCoord, *newTile)
+	var completion Completion
 
 	for dir := b.Top; dir <= b.Left; dir++ {
-		feature, index := newTile.FeatureByDirection(dir)
+		feature, index := tile.FeatureByDirection(dir)
 		if feature.Type != b.FeatureCity && feature.Type != b.FeatureRoad {
 			continue
 		}
-		if _, ok := result.RegionsByFeature[index]; !ok {
-			result.RegionsByFeature[index] = nil
-		}
-		neighbourCoord := newCoord.CoordByDirection(dir)
+		neighbourCoord := state.CurrCoord.CoordByDirection(dir)
 		neighbourTile, exists := state.Board.GetTile(neighbourCoord)
 		if !exists {
 			continue
 		}
-
-		result.SidesToComplete = append(result.SidesToComplete, dir)
+		completion.SidesToComplete = append(completion.SidesToComplete, dir)
 		if feature.IsOtherSidesComplete(dir) {
-			dist := FeatureRef{Index: index, Coord: newCoord}
-			result.DistrictsToComplete = append(result.DistrictsToComplete, dist)
+			dist := FeatureRef{Index: index, Coord: state.CurrCoord}
+			completion.DistrictsToComplete = append(completion.DistrictsToComplete, dist)
 		}
 		neighbourFeature, i := neighbourTile.FeatureByDirection(dir.Opposite())
 		if neighbourFeature.IsOtherSidesComplete(dir.Opposite()) {
 			dist := FeatureRef{Index: i, Coord: neighbourCoord}
-			result.DistrictsToComplete = append(result.DistrictsToComplete, dist)
+			completion.DistrictsToComplete = append(completion.DistrictsToComplete, dist)
 		}
+	}
 
+	return completion
+}
+
+func analyzeRegionsPlacement(state GameState) map[int][]b.RegionID {
+	tile, exists := state.Board.GetTile(state.CurrCoord)
+	if !exists {
+		panic(fmt.Sprintf("Tile on %+v does not exist!", state.CurrCoord))
+	}
+
+	regions := make(map[int][]b.RegionID)
+
+	for dir := b.Top; dir <= b.Left; dir++ {
+		feature, index := tile.FeatureByDirection(dir)
+		if feature.Type != b.FeatureCity && feature.Type != b.FeatureRoad {
+			continue
+		}
+		if _, ok := regions[index]; !ok {
+			regions[index] = nil
+		}
+		neighbourCoord := state.CurrCoord.CoordByDirection(dir)
+		neighbourTile, exists := state.Board.GetTile(neighbourCoord)
+		if !exists {
+			continue
+		}
 		neighbourRegion, exists := FindNeighbourRegionID(*neighbourTile, dir)
 		if !exists {
 			continue
 		}
-		if !slices.Contains(result.RegionsByFeature[index], neighbourRegion) {
-			result.RegionsByFeature[index] = append(result.RegionsByFeature[index], neighbourRegion)
+		if !slices.Contains(regions[index], neighbourRegion) {
+			regions[index] = append(regions[index], neighbourRegion)
 		}
 	}
 
-	return result
+	return regions
 }

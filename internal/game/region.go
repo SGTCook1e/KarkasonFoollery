@@ -41,6 +41,21 @@ func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, i
 	return r
 }
 
+func (r *Region) Clone() Region {
+	clone := Region{
+		ID:    r.ID,
+		Type:  r.Type,
+		Owner: r.Owner,
+	}
+
+	if r.Districts != nil {
+		clone.Districts = make([]FeatureRef, len(r.Districts))
+		copy(clone.Districts, r.Districts)
+	}
+
+	return clone
+}
+
 func GetNumberOfTilesAround(bd b.Board, newTileCoords b.Coord) int {
 	var ctr int
 	for _, c := range newTileCoords.GetCoordsAround() {
