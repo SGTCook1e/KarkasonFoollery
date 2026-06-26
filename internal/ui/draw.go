@@ -38,7 +38,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		screen.DrawImage(img, opts)
 		g.drawTileSideLabels(screen, *t, worldX, worldY) //
-		g.drawRegionMarkers(screen, *t, worldX, worldY)  //
+		g.drawRegionMarkers(screen, *t, worldX, worldY)  //}
 	}
 
 	// Draw preview last so it's on top of placed tiles
@@ -46,7 +46,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.drawTilePreview(screen)
 	}
 	if g.phase == AwaitingMeeple {
-		g.drawMeeplePreview(screen)
+		g.drawMeepleSlots(screen)
 	}
 }
 
@@ -160,8 +160,34 @@ func (g *Game) drawRegionMarkers(screen *ebiten.Image, t board.Tile, worldX, wor
 	}
 }
 
-func (g *Game) drawMeeplePreview(screen *ebiten.Image) {
+func (g *Game) drawMeepleSlots(screen *ebiten.Image) {
+	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
+	if !exists {
+		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
+	}
 
+	worldX := float64(g.state.CurrCoord.X * tileSize)
+	worldY := float64(g.state.CurrCoord.Y * tileSize)
+	color := color.RGBA{R: 120, G: 120, B: 120, A: 128}
+	scaledRad := float32(40 * g.zoom)
+
+	if tile.Monastery {
+		mx := worldX + tileSize*0.5
+		my := worldY + tileSize*0.5
+
+		sx, sy := g.worldToScreen(mx, my)
+		vector.FillCircle(screen, float32(sx), float32(sy), scaledRad, color, true)
+	}
+
+	for _, feature := range tile.Features {
+		if feature.Type == board.FeatureField || feature.Type == board.FeatureRiver {
+			continue
+		}
+		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, *tile)
+		sx, sy := g.worldToScreen(fx, fy)
+
+		vector.FillCircle(screen, float32(sx), float32(sy), scaledRad, color, true)
+	}
 }
 
 func (g *Game) drawLine(screen *ebiten.Image, x1, y1, x2, y2 float64) {
