@@ -32,7 +32,7 @@ func (rs *Regions) Clone() Regions {
 	return clone
 }
 
-func FindNeighbourRegionID(neighbourTile b.Tile, neighbourDir b.Direction) (b.RegionID, bool) {
+func findNeighbourRegionID(neighbourTile b.Tile, neighbourDir b.Direction) (b.RegionID, bool) {
 	feature, _ := neighbourTile.FeatureByDirection(neighbourDir.Opposite())
 	if feature.RegionID == b.NoRegion {
 		return b.NoRegion, false
@@ -41,7 +41,7 @@ func FindNeighbourRegionID(neighbourTile b.Tile, neighbourDir b.Direction) (b.Re
 	}
 }
 
-func (rs *Regions) AppendRegion(r Region) b.RegionID {
+func (rs *Regions) addRegion(r Region) b.RegionID {
 	if r.ID != b.NoRegion {
 		panic("region already has ID")
 	}
@@ -55,15 +55,15 @@ func (rs *Regions) AppendRegion(r Region) b.RegionID {
 	return id
 }
 
-func (rs *Regions) MergeRegions(coords b.Coord, newFeature int, regionIds []b.RegionID) {
+func (rs *Regions) mergeRegions(coords b.Coord, newFeature int, regionIds []b.RegionID) {
 	targetId := regionIds[0]
 	for i := 1; i < len(regionIds); i++ {
 		rs.byID[targetId].Districts = append(rs.byID[targetId].Districts, rs.byID[regionIds[i]].Districts...)
-		rs.DeleteRegion(regionIds[i])
+		rs.deleteRegion(regionIds[i])
 	}
-	rs.byID[targetId].ExpandRegion(coords, newFeature)
+	rs.byID[targetId].expandRegion(coords, newFeature)
 }
 
-func (rs *Regions) DeleteRegion(id b.RegionID) {
+func (rs *Regions) deleteRegion(id b.RegionID) {
 	delete(rs.byID, id)
 }

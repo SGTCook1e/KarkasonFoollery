@@ -10,7 +10,7 @@ const (
 	RegionMonastery RegionType = "monastery"
 )
 
-type FeatureRef struct {
+type featureRef struct {
 	Coord    b.Coord
 	Index    int
 	Complete bool
@@ -19,7 +19,7 @@ type FeatureRef struct {
 type Region struct {
 	ID        b.RegionID
 	Type      RegionType
-	Districts []FeatureRef
+	Districts []featureRef
 	Owner     b.PlayerID
 	// Score    int
 }
@@ -28,14 +28,14 @@ func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, i
 	if isMonastery {
 		r := Region{
 			Type:      RegionMonastery,
-			Districts: []FeatureRef{{Coord: newCoord}},
+			Districts: []featureRef{{Coord: newCoord}},
 			Owner:     owner,
 		}
 		return r
 	}
 	r := Region{
 		Type:      RegionType(featureType),
-		Districts: []FeatureRef{{Coord: newCoord, Index: featureIndex}},
+		Districts: []featureRef{{Coord: newCoord, Index: featureIndex}},
 		Owner:     owner,
 	}
 	return r
@@ -49,14 +49,14 @@ func (r *Region) Clone() Region {
 	}
 
 	if r.Districts != nil {
-		clone.Districts = make([]FeatureRef, len(r.Districts))
+		clone.Districts = make([]featureRef, len(r.Districts))
 		copy(clone.Districts, r.Districts)
 	}
 
 	return clone
 }
 
-func GetNumberOfTilesAround(bd b.Board, newTileCoords b.Coord) int {
+func getNumberOfTilesAround(bd b.Board, newTileCoords b.Coord) int {
 	var ctr int
 	for _, c := range newTileCoords.GetCoordsAround() {
 		_, exists := bd.GetTile(c)
@@ -67,11 +67,11 @@ func GetNumberOfTilesAround(bd b.Board, newTileCoords b.Coord) int {
 	return ctr
 }
 
-func (r *Region) ExpandRegion(newTileCoords b.Coord, featureIndex int) {
-	r.Districts = append(r.Districts, FeatureRef{Coord: newTileCoords, Index: featureIndex})
+func (r *Region) expandRegion(newTileCoords b.Coord, featureIndex int) {
+	r.Districts = append(r.Districts, featureRef{Coord: newTileCoords, Index: featureIndex})
 }
 
-func (r *Region) IsComplete() bool {
+func (r *Region) isComplete() bool {
 	for _, feature := range r.Districts {
 		if !feature.Complete {
 			return false

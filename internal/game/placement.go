@@ -6,41 +6,41 @@ import (
 	"slices"
 )
 
-type AnalysisResult struct {
+type analysisResult struct {
 	// Map for each feature index of newTile with its neighbours regions slice
 	RegionsByFeature map[int][]b.RegionID
-	Completion       Completion
+	Completion       completion
 }
 
-type Completion struct {
+type completion struct {
 	SidesToComplete     []b.Direction
-	DistrictsToComplete []FeatureRef
+	DistrictsToComplete []featureRef
 }
 
 func ResolvePlacement(state GameState, owner b.PlayerID) GameState {
-	var result AnalysisResult
+	var result analysisResult
 	result.RegionsByFeature = analyzeRegionsPlacement(state)
 	result.Completion = analyzeCompletion(state)
 
 	draft := state.Clone()
-	draft.ApplyRegionsPlacement(result, owner)
-	draft.ApplyCompletion(result, owner)
+	draft.applyRegionsPlacement(result, owner)
+	draft.applyCompletion(result, owner)
 
-	effects := ResolvePlacementEffects(draft)
-	draft.ApplyScoring(effects.PointsToScore)
-	draft.ReturnMeeples(effects.MeeplesToReturn)
-	draft.CompleteRegions(effects.RegionsToComplete)
+	effects := resolvePlacementEffects(draft)
+	draft.applyScoring(effects.PointsToScore)
+	draft.returnMeeples(effects.MeeplesToReturn)
+	draft.completeRegions(effects.RegionsToComplete)
 
 	return draft
 }
 
-func analyzeCompletion(state GameState) Completion {
+func analyzeCompletion(state GameState) completion {
 	tile, exists := state.Board.GetTile(state.CurrCoord)
 	if !exists {
-		panic(fmt.Sprintf("Tile on %+v does not exist!", state.CurrCoord))
+		panic(fmt.Sprintf("Tile at %+v does not exist!", state.CurrCoord))
 	}
 
-	var completion Completion
+	var completion completion
 
 	for dir := b.Top; dir <= b.Left; dir++ {
 		feature, index := tile.FeatureByDirection(dir)
@@ -54,12 +54,12 @@ func analyzeCompletion(state GameState) Completion {
 		}
 		completion.SidesToComplete = append(completion.SidesToComplete, dir)
 		if feature.IsOtherSidesComplete(dir) {
-			dist := FeatureRef{Index: index, Coord: state.CurrCoord}
+			dist := featureRef{Index: index, Coord: state.CurrCoord}
 			completion.DistrictsToComplete = append(completion.DistrictsToComplete, dist)
 		}
 		neighbourFeature, i := neighbourTile.FeatureByDirection(dir.Opposite())
 		if neighbourFeature.IsOtherSidesComplete(dir.Opposite()) {
-			dist := FeatureRef{Index: i, Coord: neighbourCoord}
+			dist := featureRef{Index: i, Coord: neighbourCoord}
 			completion.DistrictsToComplete = append(completion.DistrictsToComplete, dist)
 		}
 	}
@@ -88,7 +88,7 @@ func analyzeRegionsPlacement(state GameState) map[int][]b.RegionID {
 		if !exists {
 			continue
 		}
-		neighbourRegion, exists := FindNeighbourRegionID(*neighbourTile, dir)
+		neighbourRegion, exists := findNeighbourRegionID(*neighbourTile, dir)
 		if !exists {
 			continue
 		}
