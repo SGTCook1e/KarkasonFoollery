@@ -24,15 +24,7 @@ type Region struct {
 	// Score    int
 }
 
-func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, isMonastery bool, owner b.PlayerID) Region {
-	if isMonastery {
-		r := Region{
-			Type:      RegionMonastery,
-			Districts: []featureRef{{Coord: newCoord}},
-			Owner:     owner,
-		}
-		return r
-	}
+func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, owner b.PlayerID) Region {
 	r := Region{
 		Type:      RegionType(featureType),
 		Districts: []featureRef{{Coord: newCoord, Index: featureIndex}},

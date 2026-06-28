@@ -171,14 +171,6 @@ func (g *Game) drawMeepleSlots(screen *ebiten.Image) {
 	color := color.RGBA{R: 120, G: 120, B: 120, A: 128}
 	scaledRad := float32(40 * g.zoom)
 
-	if tile.Monastery {
-		mx := worldX + tileSize*0.5
-		my := worldY + tileSize*0.5
-
-		sx, sy := g.worldToScreen(mx, my)
-		vector.FillCircle(screen, float32(sx), float32(sy), scaledRad, color, true)
-	}
-
 	for _, feature := range tile.Features {
 		if feature.Type == board.FeatureField || feature.Type == board.FeatureRiver {
 			continue

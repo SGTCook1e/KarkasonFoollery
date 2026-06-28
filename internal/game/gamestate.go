@@ -90,14 +90,10 @@ func (s *GameState) applyRegionsPlacement(res analysisResult, owner b.PlayerID) 
 		panic(fmt.Sprintf("Tile at %+v does not exist!", s.CurrCoord))
 	}
 
-	if tile.Monastery {
-		newReg := MakeRegion(s.CurrCoord, 0, b.FeatureMonastery, true, owner)
-		s.Regions.addRegion(newReg)
-	}
 	for featId, regIds := range res.RegionsByFeature {
 		switch len(regIds) {
 		case 0: //If 0 regions found for feature, make a new region
-			newReg := MakeRegion(s.CurrCoord, featId, tile.Features[featId].Type, false, owner)
+			newReg := MakeRegion(s.CurrCoord, featId, tile.Features[featId].Type, owner)
 			id := s.Regions.addRegion(newReg)
 			tile.UpdateRegionId(featId, id)
 		case 1: //If 1 regions found for feature, append this feature to existing neighbour region

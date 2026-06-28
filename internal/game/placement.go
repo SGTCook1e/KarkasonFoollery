@@ -75,25 +75,53 @@ func analyzeRegionsPlacement(state GameState) map[int][]b.RegionID {
 
 	regions := make(map[int][]b.RegionID)
 
-	for dir := b.Top; dir <= b.Left; dir++ {
-		feature, index := tile.FeatureByDirection(dir)
-		if feature.Type != b.FeatureCity && feature.Type != b.FeatureRoad {
+	// for dir := b.Top; dir <= b.Left; dir++ {
+	// 	feature, index := tile.FeatureByDirection(dir)
+	// 	if feature.Type != b.FeatureCity && feature.Type != b.FeatureRoad {
+	// 		continue
+	// 	}
+	// 	if _, ok := regions[index]; !ok {
+	// 		regions[index] = nil
+	// 	}
+	// 	neighbourCoord := state.CurrCoord.CoordByDirection(dir)
+	// 	neighbourTile, exists := state.Board.GetTile(neighbourCoord)
+	// 	if !exists {
+	// 		continue
+	// 	}
+	// 	neighbourRegion, exists := findNeighbourRegionID(*neighbourTile, dir)
+	// 	if !exists {
+	// 		continue
+	// 	}
+	// 	if !slices.Contains(regions[index], neighbourRegion) {
+	// 		regions[index] = append(regions[index], neighbourRegion)
+	// 	}
+	// }
+
+	for index, feature := range tile.Features {
+		if feature.Type != b.FeatureCity &&
+			feature.Type != b.FeatureRoad &&
+			feature.Type != b.FeatureMonastery {
 			continue
 		}
-		if _, ok := regions[index]; !ok {
-			regions[index] = nil
-		}
-		neighbourCoord := state.CurrCoord.CoordByDirection(dir)
-		neighbourTile, exists := state.Board.GetTile(neighbourCoord)
-		if !exists {
+		regions[index] = nil
+		if feature.Type == b.FeatureMonastery {
 			continue
 		}
-		neighbourRegion, exists := findNeighbourRegionID(*neighbourTile, dir)
-		if !exists {
-			continue
-		}
-		if !slices.Contains(regions[index], neighbourRegion) {
-			regions[index] = append(regions[index], neighbourRegion)
+
+		for _, side := range feature.Sides {
+			rotDir := side.Direction.Rotate(tile.Orientation)
+			neighbourCoord := state.CurrCoord.CoordByDirection(rotDir)
+			neighbourTile, exists := state.Board.GetTile(neighbourCoord)
+			if !exists {
+				continue
+			}
+			neighbourRegion, exists := findNeighbourRegionID(*neighbourTile, rotDir)
+			if !exists {
+				continue
+			}
+			if !slices.Contains(regions[index], neighbourRegion) {
+				regions[index] = append(regions[index], neighbourRegion)
+			}
 		}
 	}
 

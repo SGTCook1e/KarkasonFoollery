@@ -19,9 +19,8 @@ type Tile struct {
 	// 3 = 270°
 	Orientation Direction
 	// Sides are stored in tile order: Top, Right, Bottom, Left.
-	Sides     [4]SideType `json:"sides"`
-	Features  []Feature   `json:"features"`
-	Monastery bool        `json:"monastery"`
+	Sides    [4]SideType `json:"sides"`
+	Features []Feature   `json:"features"`
 }
 
 func NewTile(id int, path string, sides [4]SideType) *Tile {
@@ -40,7 +39,6 @@ func (t *Tile) Clone() *Tile {
 		Texture:     t.Texture,
 		Sides:       t.Sides,
 		Orientation: t.Orientation,
-		Monastery:   t.Monastery,
 	}
 	if t.Features != nil {
 		clone.Features = make([]Feature, len(t.Features))
