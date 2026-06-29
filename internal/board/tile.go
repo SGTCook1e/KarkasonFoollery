@@ -96,3 +96,14 @@ func (t *Tile) CompleteSide(dir Direction) {
 func (t *Tile) UpdateRegionId(featId int, regId RegionID) {
 	t.Features[featId].RegionID = regId
 }
+
+func (t *Tile) HasFeatureTypes(fTypes ...FeatureType) bool {
+	for _, feature := range t.Features {
+		for _, fType := range fTypes {
+			if feature.Type == fType {
+				return true
+			}
+		}
+	}
+	return false
+}

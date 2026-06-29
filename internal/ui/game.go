@@ -3,6 +3,7 @@ package ui
 import (
 	"KarkasonFoollery/internal/board"
 	"KarkasonFoollery/internal/game"
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,6 +18,8 @@ const (
 )
 
 const tileSize = 256
+
+const slotRadius = 40
 
 type Game struct {
 	state  *game.GameState
@@ -84,6 +87,10 @@ func (g *Game) calcFeatureCoords(worldX, worldY float64, f board.Feature, t boar
 	half := float64(tileSize) / 2.0
 	centerX := worldX + half
 	centerY := worldY + half
+
+	if f.Type == board.FeatureMonastery {
+		return centerX, centerY
+	}
 
 	var dirX, dirY float64
 	for _, side := range f.Sides {
@@ -185,11 +192,63 @@ func (g *Game) handleTilePlacementInput() {
 }
 
 func (g *Game) handleMeeplePlacementInput() {
+	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
+	if !exists {
+		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
+	}
+
+	if !tile.HasFeatureTypes(board.FeatureCity, board.FeatureRoad, board.FeatureMonastery) {
+		g.phase = ResolvingPlacement
+		return
+	}
+
 	if !g.consumeLeftClick() {
 		return
 	}
 
+	worldX := float64(g.state.CurrCoord.X * tileSize)
+	worldY := float64(g.state.CurrCoord.Y * tileSize)
+
+	featId, ok := g.getClickedFeatureId(worldX, worldY, *tile)
+	if !ok {
+		return
+	}
+
+	feature := tile.Features[featId]
+	feature.Meeple = board.Peasant
+
 	g.phase = ResolvingPlacement
+}
+
+func (g *Game) getClickedFeatureId(worldX, worldY float64, tile board.Tile) (int, bool) {
+	mx, my := ebiten.CursorPosition()
+
+	for index, feature := range tile.Features {
+		if feature.Type != board.FeatureCity &&
+			feature.Type != board.FeatureRoad &&
+			feature.Type != board.FeatureMonastery {
+			continue
+		}
+		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, tile)
+		sx, sy := g.worldToScreen(fx, fy)
+		if inRadius(sx, sy, slotRadius, float64(mx), float64(my)) {
+			return index, true
+		}
+	}
+	return 0, false
+}
+
+func inRadius(centerX, centerY, radius, mouseX, mouseY float64) bool {
+	dx := mouseX - centerX
+	dy := mouseY - centerY
+
+	sqDistance := (dx * dx) + (dy * dy)
+	sqRadius := radius * radius
+
+	if sqDistance <= sqRadius {
+		return true
+	}
+	return false
 }
 
 func (g *Game) handlePlacementResolve() {
