@@ -15,6 +15,7 @@ const (
 	AwaitingTile       turnPhase = "AwaitingTile"
 	AwaitingMeeple     turnPhase = "AwaitingMeeple"
 	ResolvingPlacement turnPhase = "ResolvingPlacement"
+	EndTurn            turnPhase = "EndTurn"
 )
 
 const tileSize = 256
@@ -66,6 +67,8 @@ func (g *Game) Update() error {
 		g.handleMeeplePlacementInput()
 	case ResolvingPlacement:
 		g.handlePlacementResolve()
+	case EndTurn:
+		g.endTurn()
 	}
 
 	return nil
@@ -206,22 +209,22 @@ func (g *Game) handleMeeplePlacementInput() {
 		return
 	}
 
-	worldX := float64(g.state.CurrCoord.X * tileSize)
-	worldY := float64(g.state.CurrCoord.Y * tileSize)
-
-	featId, ok := g.getClickedFeatureId(worldX, worldY, *tile)
+	featId, ok := g.getClickedFeatureId(*tile)
 	if !ok {
 		return
 	}
 
 	feature := tile.Features[featId]
-	feature.Meeple = board.Peasant
+	feature.Meeple = board.MeepleSlot{Type: board.Peasant, Owner: g.state.CurrPlayer}
 
 	g.phase = ResolvingPlacement
 }
 
-func (g *Game) getClickedFeatureId(worldX, worldY float64, tile board.Tile) (int, bool) {
+func (g *Game) getClickedFeatureId(tile board.Tile) (int, bool) {
 	mx, my := ebiten.CursorPosition()
+
+	worldX := float64(g.state.CurrCoord.X * tileSize)
+	worldY := float64(g.state.CurrCoord.Y * tileSize)
 
 	for index, feature := range tile.Features {
 		if feature.Type != board.FeatureCity &&
@@ -255,6 +258,11 @@ func (g *Game) handlePlacementResolve() {
 	result := game.ResolvePlacement(*g.state, 1)
 	g.state.ApplyPlacement(result, 1)
 
+	g.phase = EndTurn
+}
+
+func (g *Game) endTurn() {
+	g.state.AdvanceTurn()
 	g.phase = AwaitingTile
 }
 

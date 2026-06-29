@@ -13,15 +13,18 @@ type GameState struct {
 	TopTile   b.Tile
 	CurrCoord b.Coord
 
-	PlacedMeeple b.MeepleType
-	MeepleFeatId int
+	Players      []*Player
+	CurrPlayer   b.PlayerID
+	nextPlayerId b.PlayerID
 }
 
 func NewState(tiles []*b.Tile) *GameState {
 	s := &GameState{
-		Deck:    *NewDeck(tiles),
-		Regions: *NewRegions(),
-		Board:   *b.NewBoard(),
+		Deck:         *NewDeck(tiles),
+		Regions:      *NewRegions(),
+		Board:        *b.NewBoard(),
+		CurrPlayer:   0,
+		nextPlayerId: 0,
 	}
 	s.TopTile = s.Deck.Draw()
 	return s
@@ -118,4 +121,20 @@ func (s *GameState) returnMeeples(mpr map[b.PlayerID][]b.MeepleType) {
 
 func (s *GameState) completeRegions(rtc []b.RegionID) {
 
+}
+
+func (s *GameState) AdvanceTurn() {
+	var index int
+	for i, p := range s.Players {
+		if p.Id == s.CurrPlayer {
+			index = (i + 1) % (len(s.Players) - 1)
+		}
+	}
+	s.CurrPlayer = s.Players[index].Id
+}
+
+func (s *GameState) AddPlayer() b.PlayerID {
+	p := NewPlayer(s.nextPlayerId)
+	s.Players = append(s.Players, &p)
+	return s.nextPlayerId + 1
 }

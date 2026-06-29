@@ -15,10 +15,15 @@ type Side struct {
 	Complete  bool
 }
 
+type MeepleSlot struct {
+	Type  MeepleType
+	Owner PlayerID
+}
+
 type Feature struct {
 	RegionID RegionID
 	Type     FeatureType `json:"type"`
-	Meeple   MeepleType
+	Meeple   MeepleSlot
 	Sides    []Side `json:"sides"`
 }
 
