@@ -19,7 +19,7 @@ const (
 
 const tileSize = 256
 
-const slotRadius = 40
+const slotRadius = 35
 
 type Game struct {
 	state  *game.GameState
@@ -106,7 +106,7 @@ func (g *Game) calcFeatureCoords(worldX, worldY float64, f board.Feature, t boar
 		}
 	}
 
-	shiftDistance := float64(tileSize) * 0.22
+	shiftDistance := float64(tileSize) * 0.28
 	featX := centerX + (dirX * shiftDistance)
 	featY := centerY + (dirY * shiftDistance)
 
