@@ -23,16 +23,6 @@ type Tile struct {
 	Features []Feature   `json:"features"`
 }
 
-func NewTile(id int, path string, sides [4]SideType) *Tile {
-	return &Tile{
-		ID:      id,
-		Texture: path,
-		Sides:   sides,
-		// Features: features,
-		Orientation: Top,
-	}
-}
-
 func (t *Tile) Clone() *Tile {
 	clone := &Tile{
 		ID:          t.ID,
