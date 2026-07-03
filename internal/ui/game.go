@@ -199,8 +199,7 @@ func (g *Game) handleMeeplePlacementInput() {
 	if !exists {
 		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
 	}
-
-	if !tile.HasFeatureTypes(board.FeatureCity, board.FeatureRoad, board.FeatureMonastery) {
+	if !g.state.CanPlaceMeepleOnTile() {
 		g.phase = ResolvingPlacement
 		return
 	}
@@ -209,18 +208,29 @@ func (g *Game) handleMeeplePlacementInput() {
 		return
 	}
 
-	featId, ok := g.getClickedFeatureId(*tile)
+	featId, ok := g.getClickedFeatureId()
 	if !ok {
 		return
 	}
 
-	feature := tile.Features[featId]
-	feature.Meeple = board.MeepleSlot{Type: board.Peasant, Owner: g.state.CurrPlayer}
+	if !g.state.IsValidMeeplePlacement(featId) {
+		return
+	}
+
+	tile.Features[featId].Meeple = board.MeepleSlot{
+		Type:  board.Peasant,
+		Owner: g.state.CurrPlayer,
+	}
 
 	g.phase = ResolvingPlacement
 }
 
-func (g *Game) getClickedFeatureId(tile board.Tile) (int, bool) {
+func (g *Game) getClickedFeatureId() (int, bool) {
+	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
+	if !exists {
+		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
+	}
+
 	mx, my := ebiten.CursorPosition()
 
 	worldX := float64(g.state.CurrCoord.X * tileSize)
@@ -232,7 +242,7 @@ func (g *Game) getClickedFeatureId(tile board.Tile) (int, bool) {
 			feature.Type != board.FeatureMonastery {
 			continue
 		}
-		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, tile)
+		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, *tile)
 		sx, sy := g.worldToScreen(fx, fy)
 		if inRadius(sx, sy, slotRadius, float64(mx), float64(my)) {
 			return index, true
@@ -255,7 +265,7 @@ func inRadius(centerX, centerY, radius, mouseX, mouseY float64) bool {
 }
 
 func (g *Game) handlePlacementResolve() {
-	result := game.ResolvePlacement(*g.state, 1)
+	result := game.ResolvePlacement(*g.state)
 	g.state.ApplyPlacement(result, 1)
 
 	g.phase = EndTurn

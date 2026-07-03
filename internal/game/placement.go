@@ -17,14 +17,14 @@ type completion struct {
 	DistrictsToComplete []featureRef
 }
 
-func ResolvePlacement(state GameState, owner b.PlayerID) GameState {
+func ResolvePlacement(state GameState) GameState {
 	var result analysisResult
 	result.RegionsByFeature = analyzeRegionsPlacement(state)
 	result.Completion = analyzeCompletion(state)
 
 	draft := state.makeStateDraft()
-	draft.applyRegionsPlacement(result, owner)
-	draft.applyCompletion(result, owner)
+	draft.applyRegionsPlacement(result)
+	draft.applyCompletion(result)
 
 	effects := resolvePlacementEffects(draft)
 	draft.applyScoring(effects.PointsToScore)

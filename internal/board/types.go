@@ -19,8 +19,8 @@ const (
 
 type RegionID int
 
-const NoRegion = 0
+const NoRegion RegionID = 0
 
 type PlayerID int
 
-const NoOwner = -1
+const NoOwner PlayerID = 0

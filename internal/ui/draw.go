@@ -38,7 +38,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		screen.DrawImage(img, opts)
 		g.drawTileSideLabels(screen, *t, worldX, worldY) //
-		g.drawRegionMarkers(screen, *t, worldX, worldY)  //}
+		g.drawRegionMarkers(screen, *t, worldX, worldY)  //
+		g.drawMeeples(screen, *t, worldX, worldY)
 	}
 
 	// Draw preview last so it's on top of placed tiles
@@ -109,6 +110,23 @@ func (g *Game) drawTilePreview(screen *ebiten.Image) {
 	//g.drawTileSideLabels(screen, g.curentTile, worldX, worldY)
 }
 
+func (g *Game) drawMeeples(screen *ebiten.Image, t board.Tile, worldX, worldY float64) {
+	for _, feature := range t.Features {
+		if feature.Meeple.Type == board.NoUnit {
+			continue
+		}
+
+		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, t)
+		sx, sy := g.worldToScreen(fx, fy)
+
+		label := fmt.Sprintf("Meeple owner: %d", feature.Meeple.Owner)
+		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy))) //
+
+		// img := g.assets.Meeples[string(feature.Meeple)]
+		// screen.DrawImage(img, &opts)
+	}
+}
+
 func (g *Game) drawTileSideLabels(screen *ebiten.Image, t board.Tile, worldX, worldY float64) {
 	if g.zoom < 0.25 {
 		return
@@ -129,7 +147,7 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t board.Tile, worldX, wo
 	}
 }
 
-func getColorFromId(id int) color.Color {
+func getColorFromId(id int) color.RGBA {
 	src := rand.NewSource(int64(id))
 	rnd := rand.New(src)
 
@@ -143,6 +161,7 @@ func getColorFromId(id int) color.Color {
 
 func (g *Game) drawRegionMarkers(screen *ebiten.Image, t board.Tile, worldX, worldY float64) {
 	for _, feature := range t.Features {
+		reg := g.state.Regions.ByID[feature.RegionID]
 		if feature.RegionID == board.NoRegion {
 			continue
 		}
@@ -150,13 +169,22 @@ func (g *Game) drawRegionMarkers(screen *ebiten.Image, t board.Tile, worldX, wor
 		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, t)
 		sx, sy := g.worldToScreen(fx, fy)
 
-		regionColor := getColorFromId(int(feature.RegionID))
-		scaledSize := float32(40 * g.zoom)
+		// regionColor := getColorFromId(int(feature.RegionID))
+		regionColor := getColorFromId(int(reg.Owner))
+		if reg.Owner == board.NoOwner {
+			regionColor = color.RGBA{0, 0, 0, 100}
+		}
+		if reg.Contested {
+			regionColor = color.RGBA{255, 0, 0, 100}
+		}
 
+		scaledSize := float32(40 * g.zoom)
 		sx = sx - 0.5*float64(scaledSize)
 		sy = sy - 0.5*float64(scaledSize)
 
 		vector.FillRect(screen, float32(sx), float32(sy), scaledSize, scaledSize, regionColor, true)
+		label := fmt.Sprintf("%d:%d", reg.Owner, reg.ID)
+		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
 	}
 }
 
@@ -172,10 +200,8 @@ func (g *Game) drawMeepleSlots(screen *ebiten.Image) {
 	backlightColor := color.RGBA{R: 140, G: 140, B: 140, A: 128}
 	scaledRad := float32(slotRadius * g.zoom)
 
-	for _, feature := range tile.Features {
-		if feature.Type != board.FeatureCity &&
-			feature.Type != board.FeatureRoad &&
-			feature.Type != board.FeatureMonastery {
+	for index, feature := range tile.Features {
+		if !g.state.IsValidMeeplePlacement(index) {
 			continue
 		}
 		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, *tile)

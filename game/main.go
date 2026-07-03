@@ -17,6 +17,8 @@ func main() {
 	tiles := board.LoadTiles()
 
 	state := game.NewState(tiles)
+	state.NextPlayerId = state.AddPlayer()
+	state.NextPlayerId = state.AddPlayer()
 	game := ui.NewGame(state, assets)
 
 	ebiten.SetWindowSize(1280, 720)

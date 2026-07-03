@@ -21,6 +21,7 @@ type Region struct {
 	Type      RegionType
 	Districts []featureRef
 	Owner     b.PlayerID
+	Contested bool
 	// Score    int
 }
 
@@ -35,9 +36,10 @@ func MakeRegion(newCoord b.Coord, featureIndex int, featureType b.FeatureType, o
 
 func (r *Region) Clone() Region {
 	clone := Region{
-		ID:    r.ID,
-		Type:  r.Type,
-		Owner: r.Owner,
+		ID:        r.ID,
+		Type:      r.Type,
+		Owner:     r.Owner,
+		Contested: r.Contested,
 	}
 
 	if r.Districts != nil {
