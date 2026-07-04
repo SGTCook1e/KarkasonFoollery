@@ -61,8 +61,11 @@ func getNumberOfTilesAround(bd b.Board, newTileCoords b.Coord) int {
 	return ctr
 }
 
-func (r *Region) expandRegion(newTileCoords b.Coord, featureIndex int) {
+func (r *Region) expandRegion(newTileCoords b.Coord, featureIndex int, owner b.PlayerID) {
 	r.Districts = append(r.Districts, featureRef{Coord: newTileCoords, Index: featureIndex})
+	if r.Owner == b.NoOwner {
+		r.Owner = owner
+	}
 }
 
 func (r *Region) isComplete() bool {

@@ -55,18 +55,6 @@ func (rs *Regions) addRegion(r Region) b.RegionID {
 	return id
 }
 
-func (rs *Regions) mergeRegions(coords b.Coord, newFeature int, regionIds []b.RegionID) {
-	targetReg := rs.ByID[regionIds[0]]
-
-	for i := 1; i < len(regionIds); i++ {
-		reg := rs.ByID[regionIds[i]]
-		targetReg.Districts = append(targetReg.Districts, reg.Districts...)
-		rs.deleteRegion(regionIds[i])
-	}
-
-	targetReg.expandRegion(coords, newFeature)
-}
-
 func (rs *Regions) deleteRegion(id b.RegionID) {
 	delete(rs.ByID, id)
 }

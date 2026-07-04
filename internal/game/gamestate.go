@@ -103,12 +103,12 @@ func (s *GameState) applyRegionsPlacement(res analysisResult) {
 			id := s.Regions.addRegion(newReg)
 			tile.UpdateRegionId(featId, id)
 		case 1: //If 1 regions found for feature, append this feature to existing neighbour region
-			s.Regions.ByID[regIds[0]].expandRegion(s.CurrCoord, featId)
+			s.Regions.ByID[regIds[0]].expandRegion(s.CurrCoord, featId, owner)
 			tile.UpdateRegionId(featId, regIds[0])
 		default: //If more than 1 regions found for feature, unite this regions and add feature to it
 			targetRegId := regIds[0]
 			s.updateTilesRegionIds(regIds[1:], targetRegId)
-			s.Regions.mergeRegions(s.CurrCoord, featId, regIds)
+			s.mergeRegions(s.CurrCoord, featId, regIds)
 			tile.UpdateRegionId(featId, targetRegId)
 		}
 	}
@@ -172,6 +172,46 @@ func (s *GameState) IsValidMeeplePlacement(featId int) bool {
 	}
 
 	return true
+}
+
+func (s *GameState) mergeRegions(coords b.Coord, newFeature int, regionIds []b.RegionID) {
+	targetReg := s.Regions.ByID[regionIds[0]]
+
+	for i := 1; i < len(regionIds); i++ {
+		reg := s.Regions.ByID[regionIds[i]]
+		targetReg.Districts = append(targetReg.Districts, reg.Districts...)
+		s.Regions.deleteRegion(regionIds[i])
+	}
+	targetReg.expandRegion(coords, newFeature, b.NoOwner)
+
+	targetReg.Owner, targetReg.Contested = s.calcOwner(*targetReg)
+}
+
+func (s *GameState) calcOwner(reg Region) (b.PlayerID, bool) {
+	uniqueOwners := make(map[b.PlayerID]struct{})
+
+	for _, district := range reg.Districts {
+		tile, _ := s.Board.GetTile(district.Coord)
+		for i, feature := range tile.Features {
+			if i != district.Index {
+				continue
+			}
+			owner := feature.Meeple.Owner
+			if owner != b.NoOwner {
+				uniqueOwners[owner] = struct{}{}
+			}
+		}
+	}
+
+	switch len(uniqueOwners) {
+	case 0:
+		return b.NoOwner, false
+	case 1:
+		for k := range uniqueOwners {
+			return k, false
+		}
+	}
+	return b.NoOwner, true
 }
 
 func (s *GameState) AdvanceTurn() {
