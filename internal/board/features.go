@@ -23,6 +23,7 @@ type MeepleSlot struct {
 type Feature struct {
 	RegionID RegionID
 	Type     FeatureType `json:"type"`
+	Shield   bool        `json:"shield"`
 	Meeple   MeepleSlot
 	Sides    []Side `json:"sides"`
 }
