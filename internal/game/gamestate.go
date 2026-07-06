@@ -214,6 +214,32 @@ func (s *GameState) calcOwner(reg Region) (b.PlayerID, bool) {
 	return b.NoOwner, true
 }
 
+func (s *GameState) getContestingOwners(reg Region) []b.PlayerID {
+	var owners []b.PlayerID
+
+	max := 0
+	playersByMeeples := make(map[b.PlayerID]int)
+	for _, district := range reg.Districts {
+		tile, _ := s.Board.GetTile(district.Coord)
+		for _, feature := range tile.Features {
+			owner := feature.Meeple.Owner
+
+			playersByMeeples[owner]++
+			if max < playersByMeeples[owner] {
+				max = playersByMeeples[owner]
+			}
+		}
+	}
+
+	for player, num := range playersByMeeples {
+		if max == num {
+			owners = append(owners, player)
+		}
+	}
+
+	return owners
+}
+
 func (s *GameState) AdvanceTurn() {
 	var index int
 	for i, p := range s.Players {

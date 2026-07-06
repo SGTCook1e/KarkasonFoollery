@@ -68,7 +68,14 @@ func (r *Region) expandRegion(newTileCoords b.Coord, featureIndex int, owner b.P
 	}
 }
 
-func (r *Region) isComplete() bool {
+func (r *Region) isComplete(bd b.Board) bool {
+	if r.Type == RegionMonastery {
+		if getNumberOfTilesAround(bd, r.Districts[0].Coord) == 8 {
+			return true
+		}
+		return false
+	}
+
 	for _, feature := range r.Districts {
 		if !feature.Complete {
 			return false
