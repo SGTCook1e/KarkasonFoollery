@@ -20,6 +20,18 @@ func NewPlayer(id b.PlayerID) Player {
 	return p
 }
 
+func (p *Player) Clone() *Player {
+	clone := Player{
+		Id:      p.Id,
+		Score:   p.Score,
+		Meeples: make(map[b.MeepleType]int),
+	}
+	for k, v := range p.Meeples {
+		clone.Meeples[k] = v
+	}
+	return &clone
+}
+
 func (p *Player) canPlaceMeeple(mType b.MeepleType) bool {
 	return p.Meeples[mType] > 0
 }

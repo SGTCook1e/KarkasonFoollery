@@ -30,18 +30,24 @@ func NewState(tiles []*b.Tile) *GameState {
 	return s
 }
 
-func (s *GameState) makeStateDraft() GameState {
-	return GameState{
+func (s *GameState) makeStateDraft() *GameState {
+	draft := GameState{
 		Board:      s.Board.Clone(),
 		Regions:    s.Regions.Clone(),
+		Players:    make([]*Player, len(s.Players)),
 		CurrCoord:  s.CurrCoord,
 		CurrPlayer: s.CurrPlayer,
 	}
+	for i := range s.Players {
+		draft.Players[i] = s.Players[i].Clone()
+	}
+	return &draft
 }
 
 func (s *GameState) ApplyPlacement(draft GameState, owner b.PlayerID) {
 	s.Board = draft.Board.Clone()
 	s.Regions = draft.Regions.Clone()
+	s.Players = draft.Players
 }
 
 func (s *GameState) completeDistrict(dist featureRef) {
