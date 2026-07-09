@@ -140,8 +140,14 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t board.Tile, worldX, wo
 	}
 
 	for _, dir := range []board.Direction{board.Top, board.Right, board.Bottom, board.Left} {
-		label := string(t.SideAt(dir))
-		label = fmt.Sprintf("%s%d", label, t.ID)
+		resetDir := dir.Reset(t.Orientation)
+		side, exist := t.GetFeatureSide(resetDir)
+		if !exist {
+			panic(fmt.Sprintf("Feature Side at %s in Tile %d does not exist!", resetDir, t.ID))
+		}
+		sideType := string(t.SideAt(dir))
+		label := fmt.Sprintf("%s%d%t", sideType, t.ID, side.Complete)
+
 		sx, sy := g.worldToScreen(worldX+offsets[dir].x, worldY+offsets[dir].y)
 		ebitenutil.DebugPrintAt(screen, label, int(math.Round(sx)), int(math.Round(sy)))
 	}
