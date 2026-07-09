@@ -28,13 +28,13 @@ type Feature struct {
 	Sides    []Side `json:"sides"`
 }
 
-func (f *Feature) HasSide(dir Direction) bool {
-	for _, side := range f.Sides {
-		if side.Direction == dir {
-			return true
+func (f *Feature) GetSide(dir Direction) (*Side, bool) {
+	for i := range f.Sides {
+		if f.Sides[i].Direction == dir {
+			return &f.Sides[i], true
 		}
 	}
-	return false
+	return nil, false
 }
 
 func (f *Feature) IsOtherSidesComplete(dir Direction) bool {
@@ -43,6 +43,15 @@ func (f *Feature) IsOtherSidesComplete(dir Direction) bool {
 			continue
 		}
 		if !s.Complete {
+			return false
+		}
+	}
+	return true
+}
+
+func (f *Feature) IsComplete() bool {
+	for _, side := range f.Sides {
+		if !side.Complete {
 			return false
 		}
 	}

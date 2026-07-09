@@ -5,6 +5,7 @@ import (
 	"KarkasonFoollery/internal/game"
 	"fmt"
 	"math"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -204,6 +205,11 @@ func (g *Game) handleMeeplePlacementInput() {
 		return
 	}
 
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+		g.phase = ResolvingPlacement
+		return
+	}
+
 	if !g.consumeLeftClick() {
 		return
 	}
@@ -217,9 +223,16 @@ func (g *Game) handleMeeplePlacementInput() {
 		return
 	}
 
-	tile.Features[featId].Meeple = board.MeepleSlot{
-		Type:  board.Peasant,
-		Owner: g.state.CurrPlayer,
+	for i := range g.state.Players {
+		if g.state.Players[i].Id != g.state.CurrPlayer {
+			continue
+		}
+		if g.state.Players[i].TakeMeeple(board.Peasant) {
+			tile.Features[featId].Meeple = board.MeepleSlot{
+				Type:  board.Peasant,
+				Owner: g.state.CurrPlayer,
+			}
+		}
 	}
 
 	g.phase = ResolvingPlacement
@@ -266,7 +279,7 @@ func inRadius(centerX, centerY, radius, mouseX, mouseY float64) bool {
 
 func (g *Game) handlePlacementResolve() {
 	result := game.ResolvePlacement(*g.state)
-	g.state.ApplyPlacement(result, 1)
+	g.state.ApplyPlacement(*result, 1)
 
 	g.phase = EndTurn
 }
@@ -274,6 +287,11 @@ func (g *Game) handlePlacementResolve() {
 func (g *Game) endTurn() {
 	g.state.AdvanceTurn()
 	g.phase = AwaitingTile
+
+	fmt.Fprintf(os.Stdout, "CurrPlayer: %d\n", g.state.CurrPlayer)
+	for i, player := range g.state.Players {
+		fmt.Fprintf(os.Stdout, "Player [%d]: %+v\n", i, player)
+	}
 }
 
 func (g *Game) cursorCoord() board.Coord {

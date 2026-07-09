@@ -1,6 +1,10 @@
 package game
 
-import b "KarkasonFoollery/internal/board"
+import (
+	b "KarkasonFoollery/internal/board"
+	"fmt"
+	"os"
+)
 
 type placementEffects struct {
 	PointsToScore     map[b.PlayerID]int
@@ -27,26 +31,30 @@ func resolvePlacementEffects(state GameState) placementEffects {
 		if !region.isComplete(state.Board) {
 			continue
 		}
+		fmt.Fprintf(os.Stdout, "Reg %d COMPLETE\n", region.ID)
+		effects.RegionsToComplete = append(effects.RegionsToComplete, region.ID)
 		if region.Type == RegionMonastery {
 			effects.PointsToScore[region.Owner] += 9
 			continue
 		}
-		effects.RegionsToComplete = append(effects.RegionsToComplete, region.ID)
+
+		if region.Owner == b.NoOwner && region.Contested == false {
+			continue
+		}
 
 		tileCtr := 0
+		tilesToCount := make(map[b.Coord]struct{})
 		for _, district := range region.Districts {
+			tilesToCount[district.Coord] = struct{}{}
+
 			tile, _ := state.Board.GetTile(district.Coord)
 			for _, feature := range tile.Features {
-
 				if feature.RegionID != region.ID {
 					continue
 				}
 
-				if shouldCountTile(region.Districts, district) {
+				if feature.Shield {
 					tileCtr++
-					if feature.Shield {
-						tileCtr++
-					}
 				}
 
 				owner := feature.Meeple.Owner
@@ -57,6 +65,7 @@ func resolvePlacementEffects(state GameState) placementEffects {
 			}
 		}
 
+		tileCtr += len(tilesToCount)
 		regionScore := tileCtr * multiplier[region.Type]
 		if region.Contested {
 			owners := state.getContestingOwners(*region)
@@ -69,13 +78,4 @@ func resolvePlacementEffects(state GameState) placementEffects {
 	}
 
 	return effects
-}
-
-func shouldCountTile(districts []featureRef, district featureRef) bool {
-	for _, d := range districts {
-		if d.Coord == district.Coord && d.Index != district.Index {
-			return false
-		}
-	}
-	return true
 }

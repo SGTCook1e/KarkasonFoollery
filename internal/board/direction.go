@@ -22,6 +22,10 @@ func (d Direction) Rotate(orientation Direction) Direction {
 	return Direction((int(d) + int(orientation)) % 4)
 }
 
+func (d Direction) Reset(orientation Direction) Direction {
+	return Direction((int(d) - int(orientation) + 4) % 4)
+}
+
 func (d *Direction) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), "\"")
 	switch s {

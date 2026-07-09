@@ -58,7 +58,7 @@ func (s *GameState) completeDistrict(dist featureRef) {
 	id := t.Features[dist.Index].RegionID
 	r := s.Regions.ByID[id]
 	for i := range r.Districts {
-		if r.Districts[i].Index == dist.Index {
+		if r.Districts[i].Coord == dist.Coord {
 			r.Districts[i].Complete = true
 			return
 		}
@@ -81,16 +81,26 @@ func (s *GameState) applyCompletion(res analysisResult) {
 		panic(fmt.Sprintf("Tile at %+v does not exist!", s.CurrCoord))
 	}
 
-	for _, dir := range res.Completion.SidesToComplete {
+	for _, dir := range res.SidesToComplete {
 		tile.CompleteSide(dir)
-		neighbourTile, exists := s.Board.GetTile(s.CurrCoord.CoordByDirection(dir))
+
+		neigbourCoord := s.CurrCoord.CoordByDirection(dir)
+		neighbourTile, exists := s.Board.GetTile(neigbourCoord)
 		if !exists {
 			panic(fmt.Sprintf("Tile at %+v does not exist!", s.CurrCoord))
 		}
 		neighbourTile.CompleteSide(dir.Opposite())
-	}
-	for _, dist := range res.Completion.DistrictsToComplete {
-		s.completeDistrict(dist)
+
+		feature, index := tile.FeatureByDirection(dir)
+		if feature.IsComplete() {
+			currDist := featureRef{Coord: s.CurrCoord, Index: index}
+			s.completeDistrict(currDist)
+		}
+		feature, index = neighbourTile.FeatureByDirection(dir.Opposite())
+		if feature.IsComplete() {
+			neighbourDist := featureRef{Coord: neigbourCoord, Index: index}
+			s.completeDistrict(neighbourDist)
+		}
 	}
 }
 
@@ -121,15 +131,33 @@ func (s *GameState) applyRegionsPlacement(res analysisResult) {
 }
 
 func (s *GameState) applyScoring(pts map[b.PlayerID]int) {
-
+	for i := range s.Players {
+		s.Players[i].Score += pts[s.Players[i].Id]
+	}
 }
 
-func (s *GameState) returnMeeples(mpr map[b.PlayerID][]b.MeepleType) {
-
+func (s *GameState) returnMeeples(mtr map[b.PlayerID][]b.MeepleType) {
+	for i := range s.Players {
+		for _, m := range mtr[s.Players[i].Id] {
+			s.Players[i].Meeples[m]++
+		}
+	}
 }
 
 func (s *GameState) completeRegions(rtc []b.RegionID) {
+	for _, id := range rtc {
+		reg := s.Regions.ByID[id]
+		for _, district := range reg.Districts {
+			tile, _ := s.Board.GetTile(district.Coord)
+			feature := &tile.Features[district.Index]
 
+			feature.RegionID = b.NoRegion
+			feature.Meeple.Owner = b.NoOwner
+			feature.Meeple.Type = b.NoUnit
+		}
+
+		s.Regions.deleteRegion(id)
+	}
 }
 
 func (s *GameState) CanPlaceMeepleOnTile() bool {
@@ -225,15 +253,29 @@ func (s *GameState) getContestingOwners(reg Region) []b.PlayerID {
 
 	max := 0
 	playersByMeeples := make(map[b.PlayerID]int)
+	countedDistricts := make(map[b.Coord]struct{})
 	for _, district := range reg.Districts {
 		tile, _ := s.Board.GetTile(district.Coord)
 		for _, feature := range tile.Features {
+			if feature.RegionID != reg.ID {
+				continue
+			}
+			if _, ok := countedDistricts[district.Coord]; ok {
+				continue
+			}
+
 			owner := feature.Meeple.Owner
+			if owner == b.NoOwner {
+				continue
+			}
 
 			playersByMeeples[owner]++
+
 			if max < playersByMeeples[owner] {
 				max = playersByMeeples[owner]
 			}
+			countedDistricts[district.Coord] = struct{}{}
+			continue
 		}
 	}
 
