@@ -67,8 +67,11 @@ func analyzeRegionsPlacement(state GameState) map[int][]b.RegionID {
 			feature.Type != b.FeatureMonastery {
 			continue
 		}
-		regions[index] = nil
+
 		if feature.Type == b.FeatureMonastery {
+			if feature.Meeple.Owner != b.NoOwner {
+				regions[index] = nil
+			}
 			continue
 		}
 
