@@ -42,7 +42,6 @@ type Game struct {
 }
 
 func NewGame(state *game.GameState, assets *Assets) *Game {
-	TRACKED = state //
 	return &Game{
 		state:        state,
 		phase:        AwaitingTile,
@@ -59,11 +58,11 @@ func NewGame(state *game.GameState, assets *Assets) *Game {
 func (g *Game) Update() error {
 	g.updateHover()
 	g.updateCamera()
-	g.updateRotation()
 
 	switch g.phase {
 	case AwaitingTile:
 		g.handleTilePlacementInput()
+		g.updateRotation()
 	case AwaitingMeeple:
 		g.handleMeeplePlacementInput()
 	case ResolvingPlacement:
@@ -182,24 +181,21 @@ func (g *Game) handleTilePlacementInput() {
 		return
 	}
 
-	if !g.state.Board.IsValidPlacement(coord, g.state.TopTile) {
+	if !g.state.Board.IsValidPlacement(coord, *g.state.CurrTile) {
 		return
 	}
 
-	tile := g.state.TopTile.Clone()
+	// tile := g.state.TopTile.Clone()
 
-	g.state.Board.PlaceTile(coord, tile)
+	// g.state.Board.PlaceTile(coord, tile)
 	g.state.CurrCoord = coord
-	g.state.TopTile = g.state.Deck.Draw()
 
 	g.phase = AwaitingMeeple
 }
 
 func (g *Game) handleMeeplePlacementInput() {
-	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
-	if !exists {
-		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
-	}
+	tile := g.state.CurrTile
+
 	if !g.state.CanPlaceMeepleOnTile() {
 		g.phase = ResolvingPlacement
 		return
@@ -239,10 +235,7 @@ func (g *Game) handleMeeplePlacementInput() {
 }
 
 func (g *Game) getClickedFeatureId() (int, bool) {
-	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
-	if !exists {
-		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
-	}
+	tile := g.state.CurrTile
 
 	mx, my := ebiten.CursorPosition()
 
@@ -285,7 +278,8 @@ func (g *Game) handlePlacementResolve() {
 }
 
 func (g *Game) endTurn() {
-	g.state.AdvanceTurn()
+	g.state.PassTurn()
+	g.state.CurrTile = g.state.Deck.Draw()
 	g.phase = AwaitingTile
 
 	fmt.Fprintf(os.Stdout, "CurrPlayer: %d\n", g.state.CurrPlayer)
@@ -328,7 +322,7 @@ func (g *Game) consumeLeftClick() bool {
 func (g *Game) updateRotation() {
 	if ebiten.IsKeyPressed(ebiten.KeyR) {
 		if !g.rotPressed {
-			g.state.TopTile.Rotate()
+			g.state.CurrTile.Rotate()
 			g.rotPressed = true
 		}
 	} else {

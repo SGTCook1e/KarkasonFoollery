@@ -47,11 +47,11 @@ func shuffleTiles(tiles []*b.Tile) {
 	}
 }
 
-func (d *Deck) Draw() b.Tile {
+func (d *Deck) Draw() *b.Tile {
 	if len(d.tiles) == 0 {
-		return b.Tile{}
+		return &b.Tile{}
 	}
 	t := d.tiles[0]
 	d.tiles = d.tiles[1:]
-	return *t
+	return t.Clone()
 }

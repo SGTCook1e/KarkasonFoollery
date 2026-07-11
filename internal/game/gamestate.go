@@ -10,7 +10,7 @@ type GameState struct {
 	Regions Regions
 
 	Deck      Deck
-	TopTile   b.Tile
+	CurrTile  *b.Tile
 	CurrCoord b.Coord
 
 	Players      []*Player
@@ -26,7 +26,7 @@ func NewState(tiles []*b.Tile) *GameState {
 		CurrPlayer:   1,
 		NextPlayerId: 1,
 	}
-	s.TopTile = s.Deck.Draw()
+	s.CurrTile = s.Deck.Draw()
 	return s
 }
 
@@ -35,6 +35,7 @@ func (s *GameState) makeStateDraft() *GameState {
 		Board:      s.Board.Clone(),
 		Regions:    s.Regions.Clone(),
 		Players:    make([]*Player, len(s.Players)),
+		CurrTile:   s.CurrTile.Clone(),
 		CurrCoord:  s.CurrCoord,
 		CurrPlayer: s.CurrPlayer,
 	}
@@ -56,7 +57,10 @@ func (s *GameState) completeDistrict(dist featureRef) {
 		panic(fmt.Sprintf("Tile at %+v does not exist!", s.CurrCoord))
 	}
 	id := t.Features[dist.Index].RegionID
-	r := s.Regions.ByID[id]
+	r, exists := s.Regions.ByID[id]
+	if !exists {
+		panic(fmt.Sprintf("Region with id:%d does not exist!", id))
+	}
 	for i := range r.Districts {
 		if r.Districts[i].Coord == dist.Coord {
 			r.Districts[i].Complete = true
@@ -161,10 +165,7 @@ func (s *GameState) completeRegions(rtc []b.RegionID) {
 }
 
 func (s *GameState) CanPlaceMeepleOnTile() bool {
-	tile, exists := s.Board.GetTile(s.CurrCoord)
-	if !exists {
-		panic(fmt.Sprintf("Tile at %+v does not exist!", s.CurrCoord))
-	}
+	tile := s.CurrTile
 
 	for i := range tile.Features {
 		if s.IsValidMeeplePlacement(i) {
@@ -175,7 +176,7 @@ func (s *GameState) CanPlaceMeepleOnTile() bool {
 }
 
 func (s *GameState) IsValidMeeplePlacement(featId int) bool {
-	tile, _ := s.Board.GetTile(s.CurrCoord)
+	tile := s.CurrTile
 	feature := tile.Features[featId]
 
 	if feature.Type != b.FeatureCity &&
@@ -288,7 +289,7 @@ func (s *GameState) getContestingOwners(reg Region) []b.PlayerID {
 	return owners
 }
 
-func (s *GameState) AdvanceTurn() {
+func (s *GameState) PassTurn() {
 	var index int
 	for i, p := range s.Players {
 		if p.Id == s.CurrPlayer {

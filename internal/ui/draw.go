@@ -43,7 +43,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw preview last so it's on top of placed tiles
-	if g.phase == AwaitingTile {
+	if g.phase == AwaitingTile || g.phase == AwaitingMeeple {
 		g.drawTilePreview(screen)
 	}
 	if g.phase == AwaitingMeeple {
@@ -76,29 +76,30 @@ func (g *Game) drawGrid(screen *ebiten.Image) {
 }
 
 func (g *Game) drawTilePreview(screen *ebiten.Image) {
-	if g.state.TopTile.Texture == "" {
+	if g.state.CurrTile.Texture == "" {
 		return
 	}
 
-	img, ok := g.assets.Tiles[g.state.TopTile.Texture[:len(g.state.TopTile.Texture)-4]]
+	img, ok := g.assets.Tiles[g.state.CurrTile.Texture[:len(g.state.CurrTile.Texture)-4]]
 	if !ok {
 		return
 	}
 
-	mx, my := ebiten.CursorPosition()
-	worldX, worldY := g.screenToWorld(mx, my)
+	var coord board.Coord
+	if g.phase == AwaitingTile {
+		coord = g.cursorCoord()
+	} else if g.phase == AwaitingMeeple {
+		coord = g.state.CurrCoord
+	}
 
-	cellX := math.Floor(worldX / tileSize)
-	cellY := math.Floor(worldY / tileSize)
-	// левый верхний угол клетки в WORLD координатах (привязка к сетке)
-	worldX = cellX * tileSize
-	worldY = cellY * tileSize
+	worldX := float64(coord.X * tileSize)
+	worldY := float64(coord.Y * tileSize)
 
 	// Rotate around the tile center in local space, then scale and position
 	half := float64(tileSize) / 2
 	opts := ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(-half, -half)
-	opts.GeoM.Rotate(float64(g.state.TopTile.Orientation) * math.Pi / 2)
+	opts.GeoM.Rotate(float64(g.state.CurrTile.Orientation) * math.Pi / 2)
 	opts.GeoM.Translate(half, half)
 
 	opts.GeoM.Scale(g.zoom, g.zoom)
@@ -195,10 +196,7 @@ func (g *Game) drawRegionMarkers(screen *ebiten.Image, t board.Tile, worldX, wor
 }
 
 func (g *Game) drawMeepleSlots(screen *ebiten.Image) {
-	tile, exists := g.state.Board.GetTile(g.state.CurrCoord)
-	if !exists {
-		panic(fmt.Sprintf("Tile at %+v does not exist!", g.state.CurrCoord))
-	}
+	tile := g.state.CurrTile
 
 	worldX := float64(g.state.CurrCoord.X * tileSize)
 	worldY := float64(g.state.CurrCoord.Y * tileSize)

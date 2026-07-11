@@ -14,6 +14,8 @@ type analysisResult struct {
 
 func ResolvePlacement(state GameState) *GameState {
 	var result analysisResult
+
+	state.Board.PlaceTile(state.CurrCoord, state.CurrTile)
 	result.RegionsByFeature = analyzeRegionsPlacement(state)
 	result.SidesToComplete = analyzeCompletion(state)
 
@@ -74,6 +76,8 @@ func analyzeRegionsPlacement(state GameState) map[int][]b.RegionID {
 			}
 			continue
 		}
+
+		regions[index] = nil
 
 		for _, side := range feature.Sides {
 			rotDir := side.Direction.Rotate(tile.Orientation)
