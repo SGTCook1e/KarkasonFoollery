@@ -19,11 +19,11 @@ func (d Direction) Opposite() Direction {
 }
 
 func (d Direction) Rotate(orientation Direction) Direction {
-	return Direction((int(d) + int(orientation)) % 4)
+	return (d + orientation) % 4
 }
 
 func (d Direction) Reset(orientation Direction) Direction {
-	return Direction((int(d) - int(orientation) + 4) % 4)
+	return (d - orientation + 4) % 4
 }
 
 func (d *Direction) UnmarshalJSON(data []byte) error {
