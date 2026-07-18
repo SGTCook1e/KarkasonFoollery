@@ -26,19 +26,34 @@ func (d Direction) Reset(orientation Direction) Direction {
 	return (d - orientation + 4) % 4
 }
 
-func (d *Direction) UnmarshalJSON(data []byte) error {
+func (d Direction) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), "\"")
 	switch s {
 	case "top":
-		*d = Top
+		d = Top
 	case "right":
-		*d = Right
+		d = Right
 	case "bottom":
-		*d = Bottom
+		d = Bottom
 	case "left":
-		*d = Left
+		d = Left
 	default:
 		return fmt.Errorf("invalid direction: %q", s)
 	}
 	return nil
+}
+
+func (d Direction) MarshalJSON() ([]byte, error) {
+	switch d {
+	case Top:
+		return []byte(`"top"`), nil
+	case Right:
+		return []byte(`"right"`), nil
+	case Bottom:
+		return []byte(`"bottom"`), nil
+	case Left:
+		return []byte(`"left"`), nil
+	default:
+		return nil, fmt.Errorf("invalid Direction value: %d", d)
+	}
 }
