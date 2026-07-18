@@ -86,9 +86,10 @@ func (g *Game) drawTilePreview(screen *ebiten.Image) {
 	}
 
 	var coord board.Coord
-	if g.phase == AwaitingTile {
+	switch g.phase {
+	case AwaitingTile:
 		coord = g.cursorCoord()
-	} else if g.phase == AwaitingMeeple {
+	case AwaitingMeeple:
 		coord = g.state.CurrCoord
 	}
 
@@ -108,7 +109,6 @@ func (g *Game) drawTilePreview(screen *ebiten.Image) {
 
 	opts.ColorScale.ScaleAlpha(0.5)
 	screen.DrawImage(img, &opts)
-	//g.drawTileSideLabels(screen, g.curentTile, worldX, worldY)
 }
 
 func (g *Game) drawMeeples(screen *ebiten.Image, t board.Tile, worldX, worldY float64) {
@@ -144,7 +144,7 @@ func (g *Game) drawTileSideLabels(screen *ebiten.Image, t board.Tile, worldX, wo
 		resetDir := dir.Reset(t.Orientation)
 		side, exist := t.GetFeatureSide(resetDir)
 		if !exist {
-			panic(fmt.Sprintf("Feature Side at %s in Tile %d does not exist!", resetDir, t.ID))
+			panic(fmt.Sprintf("Feature Side at %d in Tile %d does not exist!", resetDir, t.ID))
 		}
 		sideType := string(t.SideAt(dir))
 		label := fmt.Sprintf("%s%d%t", sideType, t.ID, side.Complete)
@@ -176,7 +176,6 @@ func (g *Game) drawRegionMarkers(screen *ebiten.Image, t board.Tile, worldX, wor
 		fx, fy := g.calcFeatureCoords(worldX, worldY, feature, t)
 		sx, sy := g.worldToScreen(fx, fy)
 
-		// regionColor := getColorFromId(int(feature.RegionID))
 		regionColor := getColorFromId(int(reg.Owner))
 		if reg.Owner == board.NoOwner {
 			regionColor = color.RGBA{0, 0, 0, 100}
